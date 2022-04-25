@@ -1,4 +1,9 @@
 <?php
+header("Cache-Control: no-cache, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: Wed, 1 Jan 2020 00:00:00 GMT");
+ ?>
+<?php
 include ("_core.php");
 // Page setup
 function initial()
@@ -29,6 +34,7 @@ $filename=get_name_script($uri);
 $links=permission_usr($id_user,$filename);
 
 ?>
+
 <div class="wrapper wrapper-content  animated fadeInRight">
 	<div class="row" id="row1">
 		<div class="col-lg-12">
@@ -63,6 +69,7 @@ $links=permission_usr($id_user,$filename);
 										<th class="col-lg-2">Proveedor</th>
 										<th class="col-lg-1">Exento</th>
 										<th class="col-lg-1">Estado</th>
+										<th class="col-lg-1">Fragil</th>
 										<th class="col-lg-1">Acci&oacute;n</th>
 									</tr>
 								</thead>
@@ -88,7 +95,7 @@ $links=permission_usr($id_user,$filename);
 		</div><!--div class='wrapper wrapper-content  animated fadeInRight'-->
 		<?php
 		include("footer.php");
-		echo" <script type='text/javascript' src='js/funciones/funciones_producto.js'></script>";
+		echo" <script type='text/javascript' src='js/funciones/funciones_producto.js?t".rand(1,9999)."=".rand(1,9999)."'></script>";
 		?>
 		<script type="text/javascript">
 		$(document).on('hidden.bs.modal', function(e) {
@@ -97,8 +104,6 @@ $links=permission_usr($id_user,$filename);
 		});
 		</script>
 		<?php
-
-
 	}
 	else {
 		echo "<br><br><div class='alert alert-warning'>No tiene permiso para este modulo.</div></div></div></div></div>";
@@ -124,6 +129,22 @@ function estado_producto() {
 	);
 	$where_clause = "id_producto='".$id_producto."'";
 	$delete = _update ( $table, $form_data, $where_clause );
+
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
 	if ($delete)
 	{
 		$xdatos ['typeinfo'] = 'Success';
@@ -136,6 +157,178 @@ function estado_producto() {
 	}
 	echo json_encode ( $xdatos );
 }
+
+function fragil() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'eval' => 1,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+function nofragil() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'eval' => 0,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+function exen() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'exento' => 1,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+function grav() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'exento' => 0,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+
+function activ() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'estado' => 1,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+function desac() {
+	$id_producto = $_POST ['id_producto'];
+	$table = 'producto';
+	$form_data = array(
+		'estado' => 0,
+	);
+	$where_clause = "id_producto='".$id_producto."'";
+	$delete = _update ( $table, $form_data, $where_clause );
+	$xdatos ['typeinfo'] = 'Success';
+	$xdatos ['msg'] = 'Registro actualizado con exito!';
+
+	$table_cambio="log_cambio_local";
+	$form_data = array(
+		'process' => 'update',
+		'tabla' =>  "producto",
+		'fecha' => date("Y-m-d"),
+		'hora' => date('H:i:s'),
+		'id_usuario' => $_SESSION['id_usuario'],
+		'id_sucursal' => $_SESSION['id_sucursal'],
+		'id_primario' =>$id_producto,
+		'prioridad' => "2"
+	);
+	$insert_cambio=_insert($table_cambio,$form_data);
+	$id_cambio=_insert_id();
+
+	echo json_encode ( $xdatos );
+}
+
+
+
 
 if (!isset($_POST['process'])) {
     initial();
@@ -153,6 +346,24 @@ if (!isset($_POST['process'])) {
         		break;
 						case 'estado':
         		estado_producto();
+        		break;
+						case 'fragil':
+        		fragil();
+        		break;
+						case 'nofragil':
+        		nofragil();
+        		break;
+						case 'grav':
+        		grav();
+        		break;
+						case 'exen':
+        		exen();
+        		break;
+						case 'activ':
+        		activ();
+        		break;
+						case 'desac':
+        		desac();
         		break;
         }
     }

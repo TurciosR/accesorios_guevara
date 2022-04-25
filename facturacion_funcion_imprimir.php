@@ -99,18 +99,18 @@ function print_ticket($id_factura)
 			}
 		}*/
 		//$info_factura.="TELEFONO: 2619-9285\n";
-		$info_factura.="PABLO JOSUE SEGOVIA PEÑA\n";
+		//$info_factura.="PABLO JOSUE SEGOVIA PEÑA\n";
 		$info_factura.=$esp_init."NIT :  ".$nite." NRC :".$nrce."\n";
 		$info_factura.=$esp_init."RESOLUCION:  ".$resolucion."\n";
 		$info_factura.=$esp_init."DEL ".$desde." AL ".$hasta."\n";
 		$info_factura.=$esp_init."SERIE ".$serie."\n";
 		$info_factura.=$esp_init."FECHA RESOLUCION ".$fehca."\n";
-		$info_factura.=$esp_init."TIQUETE # ".$num_fact."|";
+		$info_factura.=$esp_init."TIQUETE # ".$num_fact."|"."\n";
 		$info_factura.=$esp_init."FECHA: ".$fecha_fact." ".hora($hora)."\n";
 		$info_factura.=$esp_init."VENDEDOR: ".$vendedor."\n";
 		$info_factura.=$esp_init."CAJA : ".$caja. "  TURNO: ".$turno."\n";
-		$info_factura.=$esp_init."CLIENTE: ".$nombre_ape."|";
-		$info_factura.="DESCRIPCION  CANT.  P. UNIT    SUBTOT.\n|";
+		$info_factura.=$esp_init."CLIENTE: ".$nombre_ape."|"."\n";
+		$info_factura.="CAT.  DESCRIPCION  P.U    SUBTOT.|";
 		//Obtener informacion de tabla Factura_detalle y producto o servicio
 		$result_fact_det=datos_fact_det($id_factura);
 		$nrows_fact_det=_num_rows($result_fact_det);
@@ -143,7 +143,10 @@ function print_ticket($id_factura)
 			//presentacion producto
 			if($id_presentacion!=-9999)
 			{
-				$sql_uus=_fetch_array(_query("SELECT pp.precio, pp.unidad, pp.descripcion, p.nombre  FROM presentacion_producto as pp, presentacion as p WHERE pp.id_presentacion=p.id_presentacion AND pp.id_pp=$id_presentacion"));
+				$sql_uus=_fetch_array(_query("SELECT pp.precio, pp.unidad,
+				pp.descripcion, p.nombre  FROM presentacion_producto
+				as pp, presentacion as p WHERE pp.id_presentacion=
+				p.id_presentacion AND pp.id_pp=$id_presentacion"));
 				$unidad_w=$sql_uus['unidad'];
 				$desc_pr=$sql_uus['descripcion'];
 				$prese_pr=$sql_uus['nombre'];
@@ -528,7 +531,7 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 			// code...
 			$cond_pago="CONTADO";
 		}
-
+		//
 		$sql_user="select * from usuario where id_usuario='$id_usuario'";
 		$result_user= _query($sql_user);
 		$row_user=_fetch_array($result_user);
@@ -544,6 +547,7 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 		$nombres=" ".$row1['nombre'];
 		$dui=$row1['dui'];
 		$nit=$row1['nit'];
+		$direccionC = $row1['direccion'];
 
 
 		//Columnas y posiciones base
@@ -557,7 +561,7 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 			$nodp=($nit);
 		}
 
-		$nombre_ape=$nombrex;//$nombreapecte;
+		$nombre_ape=$nombres;//$nombreapecte;
 		$total_final=0;
 
 		/*margen derecho*/
@@ -575,23 +579,22 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 		list($diaa,$mess,$anio)=explode("-",$fecha_fact);
 
 
-		$arrayL[8]=  p_set($arrayL[8],$diaa,84,90,"B");
-		$arrayL[8]=  p_set($arrayL[8],$mess,92,110,"B");
-		$arrayL[8]=  p_set($arrayL[8],$anio,112,120,"B");
+		$arrayL[9]=  p_set($arrayL[9],$diaa,72,79,"B");
+		$arrayL[9]=  p_set($arrayL[9],$mess,82,92,"B");
+		$arrayL[9]=  p_set($arrayL[9],$anio,97,104,"B");
+		$arrayL[11]= p_set($arrayL[11],$nombre_ape,21,100,"R");
+		$arrayL[13]= p_set($arrayL[13],$direccionC,25,100,"R");
+		$arrayL[17]= p_set($arrayL[17],$dui,27,55,"R");
 
-		$arrayL[10]= p_set($arrayL[10],$nombre_ape,16,120,"R");
-
-		$arrayL[12]= p_set($arrayL[12],$direccionx,19,120,"R");
-
+		/*
+		 * Definimos las lineas donde se pintara el contenido de la
+		 * factura.
+		*/
 		$array_painc = array(
-			16,
-			17,
-			19,
-			21,
-			23,
-			25,
-			27,
-			29,
+			22,
+			24,
+			26,
+			28,
 			30,
 			32,
 			34,
@@ -599,8 +602,7 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 			38,
 			40,
 			42,
-			43,
-			45
+			44
 		);
 
 		$sql_fact_det="SELECT
@@ -674,19 +676,19 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 
 
 			//imprimir productos
-			if ($i<28) {
+			if ($i<12) {
 
 				if ($exento==0){
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,5,13,"B");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),15,80,"R");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,81,94,"L");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,106,120,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,10,15,"B");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),20,63,"R");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,68,75,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,95,104,"L");
 				}
 				else{
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,5,13,"B");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),15,80,"R");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,90,106,"L");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,105,120,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,10,15,"B");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),19,63,"R");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,68,75,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,86,91,"L");
 				}
 
 			}
@@ -716,21 +718,23 @@ function print_fact($id_factura,$tipo_id,$nombreapecte,$direccion)
 	$total_value_fin=sprintf("%.4f",$total_fin);
 
 	$array_painc = array(
-		0 => 48,
-		1 => 49,
+		0 => 46,
+		1 => 47,
+		2 => 48,
+		3 => 49,
+		4 => 50
 	);
 	$array_nocon= dtl($cadena_salida_txt,56);
 
 	foreach ($array_nocon as $key => $value) {
 		// code...
-		$arrayL[$array_painc[$key]]=p_set($arrayL[$array_painc[$key]],$value,13,70,"R");
+		$arrayL[$array_painc[$key]]=p_set($arrayL[$array_painc[$key]],$value,17,59,"R");
 	}
-
-	$arrayL[47]= p_set($arrayL[47],sprintf("%.4f",$SumGravado),105,120,"L");
-	$arrayL[49]= p_set($arrayL[49],sprintf("%.4f",$venta_exenta),105,120,"L");
-	$arrayL[51]= p_set($arrayL[51],sprintf("%.4f",round(($SumGravado+$venta_exenta),4)),105,120,"L");
-	$arrayL[53]= p_set($arrayL[53],sprintf("%.4f",$row_fact['retencion']),105,120,"L");
-	$arrayL[55]= p_set($arrayL[55],sprintf("%.2f",round(($SumGravado+$venta_exenta-$row_fact['retencion']),2)),105,120,"L");
+	//$arrayL[46]= p_set($arrayL[46],sprintf("%.4f",$venta_exenta),87,91,"L");
+	$arrayL[46]= p_set($arrayL[46],sprintf("%.4f",$SumGravado),95,104,"L");
+	$arrayL[48]= p_set($arrayL[48],sprintf("%.4f",$row_fact['retencion']),95,104,"L");
+	$arrayL[50]= p_set($arrayL[50],sprintf("%.4f",round(($SumGravado+$venta_exenta),4)),95,104,"L");
+	$arrayL[56]= p_set($arrayL[56],sprintf("%.2f",round(($SumGravado+$venta_exenta-$row_fact['retencion']),2)),95,104,"L");
 
 	foreach ($arrayL as $key => $value) {
 		$info_factura.=$value;
@@ -1306,34 +1310,34 @@ function print_ccf($id_fact,$tipo_id,$nitcte,$nrccte,$nombreapecte,$direccion)
 						$giro_cte=$row1['giro'];
 						$nombres=$row1['nombre'];
 						$depart=$row1['nombre_departamento'];
+						$direccion=$row1['direccion'];
 				}
 		}
 
 		$nombre_ape=$nombres;
-		$dir_txt=$direccion;
+		$direccion_cliente=$direccion;
 		$giro_cte1=$giro_cte;
 		$total_final=0;
+		$nit_cliente = $nit;
 
 		$nombreapecte=trim($nombreapecte);
 
 		/*72 caracteres*/
 		list($diaa,$mess,$anio)=explode("-",$fecha_fact);
+		$arrayL[9]=  p_set($arrayL[9],$diaa,72,79,"B");
+		$arrayL[9]=  p_set($arrayL[9],$mess,82,92,"B");
+		$arrayL[9]=  p_set($arrayL[9],$anio,97,103,"B");
+		//$arrayL[9]=  p_set($arrayL[9],$diaa."-".$mess."-".$anio,75,120,"R");
+		$arrayL[10]=  p_set($arrayL[10],$nombre_ape,21,103,"R");
+		//$arrayL[11]=  p_set($arrayL[11],substr($dir_txt,0,43),21,103,"R");
+		$arrayL[12]=  p_set($arrayL[12],$direccion_cliente,21,63,"R");
+		$arrayL[12]=  p_set($arrayL[12],$nrccte,80,103,"L");
+		$arrayL[14]=  p_set($arrayL[14],$depart,28,63,"R");
+		$arrayL[14]=  p_set($arrayL[14],$giro_cte1,73,103,"R");
+		$arrayL[16]=  p_set($arrayL[16],$nit_cliente,17,63,"R");
+		$arrayL[16]=  p_set($arrayL[16],get_tipo($row_fact['credito']),93,103,"R");
 
-		$arrayL[10]=  p_set($arrayL[10],$nombreapecte,16,64,"R");
 
-		$arrayL[10]=  p_set($arrayL[10],$diaa."-".$mess."-".$anio,75,120,"R");
-
-		$arrayL[11]=  p_set($arrayL[11],substr($dir_txt,0,43),21,64,"R");
-		$arrayL[13]=  p_set($arrayL[13],substr($dir_txt,43),7,64,"R");
-
-
-		$arrayL[11]=  p_set($arrayL[11],$nrccte,81,120,"L");
-		$arrayL[13]=  p_set($arrayL[13],$giro_cte1,73,120,"R");
-
-
-		$arrayL[14]=  p_set($arrayL[14],get_tipo($row_fact['credito']),84,120,"R");
-
-		$arrayL[15]=  p_set($arrayL[15],$depart,25,64,"R");
 
 
 
@@ -1371,17 +1375,24 @@ function print_ccf($id_fact,$tipo_id,$nitcte,$nrccte,$nombreapecte,$direccion)
 		$total_exento=0;
 		$total_gravado=0;
 
+		/*
+		 * Definimos las lineas donde se pintara el contenido de la
+		 * factura.
+		*/
 		$array_painc = array(
-			21,
-			23,
-			25,
-			27,
-			29,
-			31,
-			33,
-			35,
-			37,
-		);
+			22,
+			24,
+			26,
+			28,
+			30,
+			32,
+			34,
+			36,
+			38,
+			40,
+			42,
+			44
+		);;
 
 
 		for($i=0;$i<$nrows_fact_det;$i++){
@@ -1450,19 +1461,19 @@ function print_ccf($id_fact,$tipo_id,$nitcte,$nrccte,$nombreapecte,$direccion)
 			$esp_col4=espacios_izq(" ",$sp4);
 			$esp_desc=espacios_izq(" ",3);
 			//imprimir productos
-			if ($i<20) {
+			if ($i<12) {
 				// code...
 				if ($exento==0){
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,4,12,"B");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),14,73,"R");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_sin_iva,74,85,"L");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],number_format(($subtotal/1.13),4,".",""),100,120,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,10,14,"B");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),18,65,"R");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_sin_iva,69,75,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],number_format(($subtotal/1.13),4,".",""),92,103,"L");
 				}
 				if ($exento==1){
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,4,12,"B");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),14,73,"R");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,85,101,"L");
-					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,100,120,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$cantidad,10,14,"B");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],quitar_spc($descrip),18,65,"R");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$precio_unit,69,75,"L");
+					$arrayL[$array_painc[$i]]=p_set($arrayL[$array_painc[$i]],$subtotal,84,88,"L");
 					}
 			}
 			$cuantos=$cuantos+1;
@@ -1506,24 +1517,26 @@ function print_ccf($id_fact,$tipo_id,$nitcte,$nrccte,$nombreapecte,$direccion)
 	$info_factura="";
 
 	$array_painc = array(
-		0 => 40,
-		1 => 41,
-		2 => 42,
+		0 => 46,
+		1 => 47,
+		2 => 48,
+		3 => 49,
+		4 => 50
 	);
-	$array_nocon= dtl($cadena_salida_txt,51);
+	$array_nocon= dtl($cadena_salida_txt,37);
 	foreach ($array_nocon as $key => $value) {
 		// code...
 
-		$arrayL[$array_painc[$key]]=p_set($arrayL[$array_painc[$key]],$value,15,67,"B");
+		$arrayL[$array_painc[$key]]=p_set($arrayL[$array_painc[$key]],$value,19,57,"B");
 	}
-	$arrayL[39] = p_set($arrayL[39],$total_value_gravado,100,120,"L");
-	$arrayL[41] = p_set($arrayL[41],$total_iva_format,100,120,"L");
-	$arrayL[43] = p_set($arrayL[43],$subtotal_gravado_print,100,120,"L");
-	$arrayL[45] = p_set($arrayL[45],$retencion,100,120,"L");
-	$arrayL[47] = p_set($arrayL[47],"0.0000",100,120,"L");
-	$arrayL[49] = p_set($arrayL[49],$total_value_exento,100,120,"L");
-	$arrayL[51] = p_set($arrayL[51],"0.0000",100,120,"L");
-	$arrayL[53] = p_set($arrayL[53],sprintf("%.2f",$total_final_format),100,120,"L");
+	$arrayL[45] = p_set($arrayL[45],$total_value_gravado,92,103,"L");
+	$arrayL[47] = p_set($arrayL[47],$total_iva_format,92,103,"L");
+	$arrayL[49] = p_set($arrayL[49],$subtotal_gravado_print,92,103,"L");
+	$arrayL[51] = p_set($arrayL[51],$retencion,92,103,"L");
+	$arrayL[52] = p_set($arrayL[52],"0.0000",92,103,"L");
+	$arrayL[54] = p_set($arrayL[54],$total_value_exento,92,103,"L");
+	$arrayL[56] = p_set($arrayL[56],"0.0000",92,103,"L");
+	$arrayL[57] = p_set($arrayL[57],sprintf("%.2f",$total_final_format),92,103,"L");
 
 
 	foreach ($arrayL as $key => $value) {
@@ -1895,7 +1908,7 @@ function print_corte($id_corte)
 	$row = _fetch_array($result);
 	$id_empleado = $row["id_empleado"];
 	$nombre_emp = $row["nombre"];
-	
+
 
 	$result_emp= datos_empleado($id_c,$id_c);
 	list($al,$nombre_emp)=explode('|',$result_emp);
@@ -2173,7 +2186,7 @@ function print_corte($id_corte)
 		$result_dev =_query($sql_dev);
 		$nrow_dev = _num_rows($result_dev);*/
 
-		
+
 		$subtotal=$cashini+$vtaefectivo+$ingresos;
 		$totalcaja=$subtotal-$vales;
 		$tot_exent=$texento+$fexento+$cfexento;
@@ -2230,7 +2243,7 @@ function print_corte($id_corte)
 		$info_factura.=$esp_init0."TOTAL $ :".$sp1.$tot_exent.$sp2.$tot_grav.$sp3.$tot_fin."\n";
 		$info_factura.="\n";
 
-		
+
 
 		/*if($nrow_dev>0){
 		$info_factura.=$esp_init0."DEVOLUCIONES   :"."\n";

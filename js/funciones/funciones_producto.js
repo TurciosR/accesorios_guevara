@@ -155,8 +155,10 @@ function senddata()
     var process2 = $('#process').val();
     var perecedero = $('#perecedero:checked').val();
     var exento = $('#exento:checked').val();
-    var decimals = $('#decimal:checked').val();
+    var eval = $('#eval:checked').val();
 
+
+    var decimals = $('#decimal:checked').val();
 
     console.log(process);
     if (process == 'insert') {
@@ -213,7 +215,7 @@ function senddata()
     });
     var dataString = 'process=' + process + '&id_producto=' + id_producto + '&barcode=' + barcode + '&descripcion=' + descripcion;
     dataString += '&exento=' + exento + '&proveedor=' + proveedor + '&id_categoria=' + id_categoria + '&perecedero=' + perecedero + '&lista=' + lista;
-    dataString += '&marca=' + marca + '&minimo=' + minimo + '&cuantos=' + cuantos + '&estado=' + estado + '&decimals=' + decimals;
+    dataString += '&marca=' + marca + '&minimo=' + minimo + '&cuantos=' + cuantos + '&estado=' + estado+ '&eval=' + eval+ '&decimals=' + decimals;
     if(err==0)/**/
     {
       $.ajax({
@@ -225,7 +227,7 @@ function senddata()
           process = datax.process;
           id_producto2 = datax.id_producto;
           //var maxid=datax.max_id;
-          //display_notify(datax.typeinfo, datax.msg);
+           display_notify(datax.typeinfo, datax.msg);
 
           if (datax.typeinfo == "Success")
           {
@@ -239,7 +241,6 @@ function senddata()
       		 	}
       		 	if (process2 == 'insert')
       		 	{
-              //display_notify(datax.typeinfo, datax.msg);
               $("#id_id_p").val(datax.id_producto);
               img();
       		 	}
@@ -350,6 +351,7 @@ $(document).on("click", ".activate", function(){
 		}
 	});
 });
+
 function deleted() {
   var id_producto = $('#id_producto').val();
   var dataString = 'process=deleted' + '&id_producto=' + id_producto;
@@ -390,28 +392,6 @@ $(document).on("click", "#add_pre", function() {
   var unidad_pre = $("#unidad_pre").val();
   var precio_pre = $("#precio_pre").val();
   var costo_p = $("#costo_pre").val();
-  //alert(costo_p);
-  //procedemos a calcular el precio1
-  var iva = 0;
-  var utilidad = 0;
-  $.ajax({
-    url: 'agregar_producto.php',
-    type: 'POST',
-    dataType: 'json',
-    async: false,
-    data: "process=impuestos",
-    success:  function(datax)
-    {
-      //console.log(datax);
-      iva = datax.iva;
-      utilidad = datax.utilidad;
-    }
-  });
-  //alert(iva);
-
-  var ivaV = (parseFloat(costo_p)*iva);
-  var utilidadV = (parseFloat(costo_p)*utilidad);
-  var precio1 = (parseFloat(costo_p))+ivaV+utilidadV;
   var valor = $("#id_presentacion").val();
   var bar=$("#bar").val();
   var proceso=$("#process").val();
@@ -443,7 +423,7 @@ $(document).on("click", "#add_pre", function() {
         fila += "<td class='descripcion_p'>" + desc_pre + "</td>";
         fila += "<td class='unidad_p'>" + unidad_pre + "</td>";
         fila += "<td class='costo'>" + costo_p + "</td>";
-        //fila += "<td class='ed precio0'>" + precio1.toFixed(2) + "</td>";
+
         fila += "<td class='ed precio0'>" + "0.0000" + "</td>";
         fila += "<td class='ed precio1'>" + "0.0000" + "</td>";
         fila += "<td class='ed precio2'>" + "0.0000" + "</td>";
@@ -460,15 +440,13 @@ $(document).on("click", "#add_pre", function() {
       }
       else
       {
-        //alert("aqui");
         $.ajax({
           url: 'editar_producto.php',
           type: 'POST',
           dataType: 'json',
-          data: "process=add_pre"+"&id_producto="+id_producto+"&presentacion="+id_presentacion+"&descripcion="+desc_pre+"&unidad="+unidad_pre+"&costo="+costo_p+"&precio1="+precio1+"&barcode="+bar,
+          data: "process=add_pre"+"&id_producto="+id_producto+"&presentacion="+id_presentacion+"&descripcion="+desc_pre+"&unidad="+unidad_pre+"&costo="+costo_p+"&barcode="+bar,
           success: function(datax)
           {
-            //alert("aqui");
             display_notify(datax.typeinfo,datax.msg);
             if(datax.typeinfo=="Success")
             {
@@ -479,10 +457,6 @@ $(document).on("click", "#add_pre", function() {
                 data: "process=datos"+"&id_producto="+id_producto,
                 success:  function(datax)
                 {
-                  $("#id_presentacion").val("");
-                  $("#id_presentacion").trigger('change');
-                  $(".clear").val("");
-
                   btn.removeAttr('disabled');
                   $("#presentacion_table").html(datax.datos);
                 }
@@ -505,13 +479,7 @@ $('html').click(function() {
   if (isNaN(parseFloat(number))) {
 
     if (!a.hasClass('prea')) {
-      if (a.hasClass("ed3"))
-      {
-        a.html(number);
-      }
-      else {
-        a.html("0.0000");
-      }
+      a.html("0.0000")
     }
     else {
       a.html(a.attr('prea'));
@@ -701,7 +669,7 @@ function editar_img()
 					// var cadena = '<img src="'+img+'" alt="" class="img-rounded" style="height: 300px; width: 350px;">';
 					// $("#caja_img").html(cadena);
 					// $(".fileinput-remove-button").click();
-          setInterval("location.reload();", 1000);
+          //setInterval("reload();", 1000);
         }
       }
   });
@@ -818,4 +786,138 @@ $(document).on('keyup', '#costo_pre', function(evt) {
       $("#bar").focus();
     }
   }
+});
+
+
+$(document).on("click", ".fragil", function(){
+	var id = $(this).attr("id");
+	var td = $(this).parents("td");
+	var tr = $(this).parents("tr");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=fragil&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      display_notify(datax.typeinfo,datax.msg);
+      setInterval("reload1();", 1000);
+		}
+	});
+});
+
+$(document).on("click", ".nofragil", function(){
+	var id = $(this).attr("id");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=nofragil&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      display_notify(datax.typeinfo,datax.msg);
+      setInterval("reload1();", 1000);
+		}
+	});
+});
+
+
+$(document).on("click", ".grav", function(){
+  var id = $(this).closest("tr").find("#id_producto_active").val();
+
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=exen&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      td.html("<button class='btn btn-warning exent'>Exento</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
+});
+
+$(document).on("click", ".exent", function(){
+	var id = $(this).closest("tr").find("#id_producto_active").val();
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=grav&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      td.html("<button class='btn btn-primary grav'>Gravado</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
+});
+
+
+$(document).on("click", ".fragilb", function(){
+  var id = $(this).closest("tr").find("#id_producto_active").val();
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=fragil&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+
+        td.html("<button class='btn btn-primary nofragilb'>SI</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
+});
+
+$(document).on("click", ".nofragilb", function(){
+  var id = $(this).closest("tr").find("#id_producto_active").val();
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=nofragil&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      td.html("<button class='btn btn-warning fragilb'>NO</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
+});
+
+
+$(document).on("click", ".noac", function(){
+  var id = $(this).closest("tr").find("#id_producto_active").val();
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=activ&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      td.html("<button class='btn btn-primary siac'>ACTIVO</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
+});
+
+$(document).on("click", ".siac", function(){
+  var id = $(this).closest("tr").find("#id_producto_active").val();
+  td = $(this).closest("td");
+	$.ajax({
+		type: 'POST',
+		url: 'admin_producto.php',
+		data: 'process=desac&id_producto='+id,
+		dataType: 'JSON',
+		success : function(datax)
+		{
+      td.html("<button class='btn btn-warning noac'>INACTIVO</button>");
+      display_notify(datax.typeinfo,datax.msg);
+		}
+	});
 });

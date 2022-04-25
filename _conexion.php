@@ -3,7 +3,7 @@ $username = "root";
 $password = "admin$2022**.";
 //$password = "";
 $hostname = "localhost";
-$dbname = "db_servicios";
+$dbname = "accesorios_guevara";
 //$dbname = "oregon_library";
 date_default_timezone_set('America/El_Salvador');
 $conexion = mysqli_connect("$hostname","$username","$password","$dbname");

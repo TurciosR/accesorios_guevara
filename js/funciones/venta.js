@@ -1728,7 +1728,7 @@ function imprimev() {
                         }, function(data, status) {
 
                             if (status != 'success') {
-                                //alert("No Se envio la impresión " + data);
+                                alert("No Se envio la impresión " + data);
                             }
                         });
                     }
@@ -1749,7 +1749,7 @@ function imprimev() {
                         }, function(data, status) {
 
                             if (status != 'success') {
-                                //alert("No Se envio la impresión " + data);
+                                alert("No Se envio la impresión " + data);
                             }
 
                         });
@@ -1775,7 +1775,7 @@ function imprimev() {
                         }, function(data, status) {
 
                             if (status != 'success') {
-                                //alert("No Se envio la impresión " + data);
+                                alert("No Se envio la impresión " + data);
                             }
 
                         });
@@ -1797,7 +1797,7 @@ function imprimev() {
                         }, function(data, status) {
 
                             if (status != 'success') {
-                                //alert("No Se envio la impresión " + data);
+                                alert("No Se envio la impresión " + data);
                             }
 
                         });

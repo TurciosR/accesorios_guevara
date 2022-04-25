@@ -38,23 +38,33 @@ $columns = array(
   'formatter' => function ($id_producto, $row) {
     if ($id_producto==0) {
       // code...
-      return "Gravado";
+      return "<button class='btn btn-primary grav'>Gravado</button>";
     }
     else {
-      return "Exento";
+      return "<button class='btn btn-warning exent'>Exento</button>";
     }
     }, 'field' => 'exento'),
   array( 'db' => '`pr`.`estado`',   'dt' => 7,
   'formatter' => function ($estado, $row) {
     if ($estado==0) {
       // code...
-      return "<label style='color:red'>Inactivo</label><input type='hidden' name='estado' id='estado' value='".$estado."'>";
+      return "<button class='btn btn-warning noac'>INACTIVO</button><input type='hidden' name='estado' id='estado' value='".$estado."'>";
     }
     else {
-      return "<label style='color:blue'>Activo</label><input type='hidden' name='estado' id='estado' value='".$estado."'>";
+      return "<button class='btn btn-primary siac'>ACTIVO</button><input type='hidden' name='estado' id='estado' value='".$estado."'>";
     }
     }, 'field' => 'estado'),
-  array( 'db' => 'id_producto','dt' => 8,
+    array( 'db' => '`pr`.`eval`',   'dt' => 8,
+    'formatter' => function ($estado, $row) {
+      if ($estado==0) {
+        // code...
+        return "<button class='btn btn-warning fragilb'>NO</button>";
+      }
+      else {
+        return "<button class='btn btn-primary nofragilb'>SI</button>";
+      }
+      }, 'field' => 'eval'),
+  array( 'db' => 'id_producto','dt' => 9,
   'formatter' => function ($id_producto, $row) {
       $menudrop="<div class='btn-group'>
     <a href='#' data-toggle='dropdown' class='btn btn-primary dropdown-toggle'><i class='fa fa-user icon-white'></i> Menu<span class='caret'></span></a>
@@ -89,7 +99,7 @@ $columns = array(
       $filename='borrar_producto.php';
       $link=permission_usr($id_user, $filename);
       if ($link!='NOT' || $admin=='1') {
-          //$menudrop.="<li><a data-toggle='modal' href='borrar_producto.php?id_producto=" .  $row ['id_producto']."&process=formDelete"."' data-target='#deleteModal' data-refresh='true'><i class=\"fa fa-eraser\"></i> Eliminar</a></li>";
+          $menudrop.="<li><a data-toggle='modal' href='borrar_producto.php?id_producto=" .  $row ['id_producto']."&process=formDelete"."' data-target='#deleteModal' data-refresh='true'><i class=\"fa fa-eraser\"></i> Eliminar</a></li>";
       }
       $filename='ver_producto.php';
       $link=permission_usr($id_user, $filename);
@@ -101,13 +111,31 @@ $columns = array(
       if ($link!='NOT' || $admin=='1') {
           $menudrop.= "<li><a id='estado' ><i class='".$fa."'></i> ".$text1."</a></li>";
       }
-      /*
-      $filename='precio_producto.php';
+
+
+      $filename='estado_producto.php';
       $link=permission_usr($id_user, $filename);
       if ($link!='NOT' || $admin=='1') {
-          $menudrop.="<li><a href=\"precio_producto.php?id_producto=".$row['id_producto']."\"><i class=\"fa fa-money\"></i> Precios</a></li>";
+
+        $sql_p = _query("SELECT * FROM producto WHERE id_producto = '$id_producto'");
+        $row_p = _fetch_array($sql_p);
+        $estado = $row_p['eval'];
+        if($estado == 1)
+        {
+          $text1 = "Pasar a no fragil";
+          $fa = "fa fa-eye-slash";
+          $t= "nofragil";
+        }
+        else
+        {
+          $text1 = "Pasar a fragil";
+          $fa = "fa fa-eye";
+          $t= "fragil";
+
+        }
+        $menudrop.= "<li><a id='$id_producto' class='$t' ><i class='".$fa."'></i> ".$text1."</a></li>";
       }
-      */
+
 
 
       $menudrop.="</ul>
