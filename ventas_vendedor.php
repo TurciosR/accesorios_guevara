@@ -21,9 +21,9 @@ function initial() {
 	$_PAGE ['links'] .= '<link href="css/plugins/dataTables/dataTables.bootstrap.css" rel="stylesheet">';
 	$_PAGE ['links'] .= '<link href="css/plugins/dataTables/dataTables.responsive.css" rel="stylesheet">';
 	$_PAGE ['links'] .= '<link href="css/plugins/dataTables/dataTables.tableTools.min.css" rel="stylesheet">';
-  $_PAGE ['links'] .= '<link href="css/plugins/fileinput/fileinput.css" media="all" rel="stylesheet" type="text/css"/>';
+    $_PAGE ['links'] .= '<link href="css/plugins/fileinput/fileinput.css" media="all" rel="stylesheet" type="text/css"/>';
 	$_PAGE ['links'] .= '<link href="css/animate.css" rel="stylesheet">';
-  $_PAGE ['links'] .= '<link href="css/style.css" rel="stylesheet">';
+    $_PAGE ['links'] .= '<link href="css/style.css" rel="stylesheet">';
 	$_PAGE ['links'] .= '<link href="css/plugins/datapicker/datepicker3.css" rel="stylesheet">';
 
 	include_once "header.php";

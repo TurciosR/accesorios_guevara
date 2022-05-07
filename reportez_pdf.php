@@ -29,6 +29,9 @@ $razonsocial1=$row_cabe['razonsocial'];
 $giro1=$row_cabe['giro'];
 $direccion = $row_cabe['direccion'];
 
+$caja = $_REQUEST['caja'];
+
+
 
 
 # code...
@@ -189,12 +192,12 @@ $tAry = array(
 while(strtotime($fk) <= strtotime($fin1))
 {
   $fk = ($fk);
-  $sql_efectivo = _query("SELECT * FROM factura WHERE fecha = '$fk' AND finalizada=1 AND anulada=0 AND id_sucursal = '$id_sucursal'");
+  $sql_efectivo = _query("SELECT * FROM factura WHERE fecha = '$fk' AND caja = $caja AND finalizada=1 AND anulada=0 AND id_sucursal = '$id_sucursal'");
   $cuenta = _num_rows($sql_efectivo);
   $sql_min_max=_query("
-  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND numero_doc LIKE '%TIK%' AND id_sucursal = $id_sucursal UNION ALL
-  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND numero_doc LIKE '%COF%' AND id_sucursal = $id_sucursal UNION ALL
-  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND numero_doc LIKE '%CCF%' AND id_sucursal = $id_sucursal");
+  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND caja = $caja AND numero_doc LIKE '%TIK%' AND id_sucursal = $id_sucursal UNION ALL
+  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND caja = $caja AND numero_doc LIKE '%COF%' AND id_sucursal = $id_sucursal UNION ALL
+  SELECT MIN(CAST(num_fact_impresa as UNSIGNED)) as minimo, MAX(CAST(num_fact_impresa as UNSIGNED)) as maximo FROM factura WHERE fecha = '$fk' AND caja = $caja AND numero_doc LIKE '%CCF%' AND id_sucursal = $id_sucursal");
   $cuenta_min_max = _num_rows($sql_min_max);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   $total_tike = 0;
@@ -272,6 +275,12 @@ while(strtotime($fk) <= strtotime($fin1))
             $tike_max = $row_min_max["maximo"];
               list($minimo_num,$ads) = explode("_", $tike_min);
               list($maximo_num,$ads) = explode("_", $tike_max);
+              //no mostrar tickets antes de la autorizacion
+              if(strtotime($fk) < strtotime("2021-03-25"))
+              {
+                $tike_min=0;
+                $tike_max=0;
+              }
           }
           if($i == 2)
           {
@@ -283,29 +292,36 @@ while(strtotime($fk) <= strtotime($fin1))
               $credito_fiscal_min = $row_min_max["minimo"];
               $credito_fiscal_max = $row_min_max["maximo"];
               $mi = explode("_", $credito_fiscal_min);
-              $minimo_num = $$tAry['te']+=$exent_t['TIK'];mi[0];
+              //$minimo_num = $$tAry['te']+=$exent_t['TIK'];mi[0];
               $max = explode("_", $credito_fiscal_max);
-              $maximo_num = $max[0];
+              //$maximo_num = $max[0];
           }
           $i += 1;
       }
   }
 
+  if(strtotime($fk) < strtotime("2021-03-25"))
+  {
+    $total_tike = 0;
+    $exent_t["TIK"] = 0;
+  }
+  else {
+    $ar = tikets($fk);
+    $total_tike = $ar['total'];
+    $exent_t["TIK"] = $ar['exento'];
+  }
+  //$total_general = $total_tike + $total_factura + $total_credito_fiscal - $tret -  $fret -  $cret;
 
-
-
-  $total_general = $total_tike + $total_factura + $total_credito_fiscal - $tret -  $fret -  $cret;
-
-  $sql_fa = _query("SELECT * FROM factura WHERE fecha = '$fk' AND tipo_documento!='TIK'  AND anulada=1 AND num_fact_impresa>0 AND id_sucursal = '$id_sucursal'");
+  $total_general = $total_tike - $tret;
+  $sql_fa = _query("SELECT * FROM factura WHERE fecha = '$fk' AND caja = $caja AND tipo_documento!='TIK'  AND anulada=1 AND num_fact_impresa>0 AND id_sucursal = '$id_sucursal'");
   $fk = ED($fk);
 
   if($total_general!=0)
   {
 
     $pdf->AddPage('P', array(85, 215+(_num_rows($sql_fa)*7)));
-    $sqlcc = _fetch_array(_query("SELECT MAX(caja) as caja FROM factura WHERE fecha='".MD($fk)."'"));
 
-    $sql_caja = _query("SELECT * FROM caja WHERE id_caja='$sqlcc[caja]'");
+    $sql_caja = _query("SELECT * FROM caja WHERE id_caja='$caja'");
 
     $direccio=divtextlin($direccion,35);
     $empress= divtextlin($empresa1, 35);
@@ -341,7 +357,7 @@ while(strtotime($fk) <= strtotime($fin1))
 
     }
     $pdf->Ln(5);
-    $pdf->Cell(81,4,"TIQUETE #".utf8_decode(intval($tike_max+1)),0,1,'C',0);
+    //$pdf->Cell(81,4,"TIQUETE #".utf8_decode(intval($tike_max+1)),0,1,'C',0);
 
 
     $pdf->Cell(81,4,"".utf8_decode("FECHA: ".$fk),0,1,'C',0);
@@ -362,74 +378,9 @@ while(strtotime($fk) <= strtotime($fin1))
     $pdf->Cell(41,4,"TOTAL:",0,0,'L',0);
     $pdf->Cell(40,4,"$ ".number_format($total_tike-$tret, 2),0,1,'R',0);
 
-    $pdf->Ln(5);
-    $pdf->Cell(81,4,"VENTAS CON FACTURA",0,1,'L',0);
-    $pdf->Cell(41,4,"No. INICIAL:",0,0,'L',0);
-    $pdf->Cell(40,4,utf8_decode(intval($factura_min)),0,1,'R',0);
-    $pdf->Cell(41,4,"No. FINAL:",0,0,'L',0);
-    $pdf->Cell(40,4,utf8_decode(intval($factura_max)),0,1,'R',0);
-
-    $pdf->Cell(41,4,"VENTAS EXENTAS:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($exent_t['COF'], 2),0,1,'R',0);
-    $pdf->Cell(41,4,"VENTAS GRAVADAS:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($total_factura-$exent_t['COF'], 2),0,1,'R',0);
-    $pdf->Cell(41,4,"VENTAS NO SUJETAS:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format(0, 2),0,1,'R',0);
-    $pdf->Cell(41,4,"RETENCION:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($fret, 2),0,1,'R',0);
-    $pdf->Cell(41,4,"TOTAL:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($total_factura-$fret, 2),0,1,'R',0);
-
-
-    $pdf->Ln(5);
-    $pdf->Cell(81,4,"VENTAS CON CREDITO FISCAL",0,1,'L',0);
-    $pdf->Cell(41,4,"No. INICIAL:",0,0,'L',0);
-    $pdf->Cell(40,4,utf8_decode(intval($credito_fiscal_min)),0,1,'R',0);
-    $pdf->Cell(41,4,"No. FINAL:",0,0,'L',0);
-    $pdf->Cell(40,4,utf8_decode(intval($credito_fiscal_max)),0,1,'R',0);
-
-    $pdf->Cell(41,4,"VENTAS EXENTAS:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($exent_t['CCF'], 2),0,1,'R',0);
-    $pdf->Cell(41,4,"VENTAS GRAVADAS + IVA:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($total_credito_fiscal-$exent_t['CCF'], 2),0,1,'R',0);
-    $pdf->Cell(41,4,"VENTAS NO SUJETAS:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format(0, 2),0,1,'R',0);
-    $pdf->Cell(41,4,"RETENCION:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($cret, 2),0,1,'R',0);
-    $pdf->Cell(41,4,"TOTAL:",0,0,'L',0);
-    $pdf->Cell(40,4,"$ ".number_format($total_credito_fiscal-$cret, 2),0,1,'R',0);
 
     $pdf->Cell(41,4,"TOTAL GENERAL:","T",0,'L',0);
     $pdf->Cell(40,4,"$ ".number_format($total_general, 2),"T",1,'R',0);
-
-    if (_num_rows($sql_fa)>0) {
-      // code...
-      $pdf->Ln(4);
-      $pdf->Cell(81,4,"DOC. ANULADOS (FACTURA y CREDITO FISCAL):","B",1,'L',0);
-      while ($row=_fetch_array($sql_fa)) {
-        // code...
-        $tipo = "";
-
-        switch ($row['tipo_documento']) {
-          case 'COF':
-            // code...
-            $tipo = 'FACTURA';
-            break;
-          case 'CCF':
-            // code...
-            $tipo = 'CREDITO FISCAL';
-            break;
-
-          default:
-            // code...
-            break;
-        }
-
-        $pdf->Cell(30,4,$tipo,0,0,'L',0);
-        $pdf->Cell(15,4,$row['num_fact_impresa'],0,1,'L',0);
-
-      }
-    }
   }
 
 
@@ -457,3 +408,103 @@ while(strtotime($fk) <= strtotime($fin1))
 }
 
 $pdf->Output("reporte_z.pdf", "I");
+
+
+function tikets($fecha)
+{
+
+  $id_sucursal = $_SESSION['id_sucursal'];
+  $exento = $_REQUEST['tipo'];
+
+  $condicion="";
+  $condicion2="";
+
+  $total_exento_g=0;
+  $total_gravado_g=0;
+
+  $caja = $_REQUEST['caja'];
+
+  $sql_lista = _query("SELECT * FROM factura WHERE fecha = '$fecha' AND caja = $caja AND id_sucursal = '$id_sucursal'  AND tipo_documento = 'TIK'  and finalizada=1 ORDER BY CAST(num_fact_impresa as UNSIGNED) ASC");
+  $cuenta = _num_rows($sql_lista);
+
+  if($cuenta > 0)
+  {
+
+    while ($row = _fetch_array($sql_lista))
+    {
+      //$numero_docx = $rrr["numero_doc"];
+      $id_factura = $row["id_factura"];
+      $caja = $row["caja"];
+      $descuento = $row["descuento"];
+      $porcentaje = $row["porcentaje"];
+      $turno = $row["turno"];
+      $nulo = $row["anulada"];
+
+
+      $fehca = ED($dats_caja["fecha"]);
+
+
+      $sql_detalles = _query("SELECT * FROM factura_detalle join producto ON producto.id_producto=factura_detalle.id_prod_serv WHERE id_factura = '$id_factura' AND producto.eval=1");
+      $cuen_ss = _num_rows($sql_detalles);
+
+
+      $numero_doc = str_pad($row["num_fact_impresa"],8,"0",STR_PAD_LEFT)."_TIK";
+
+
+      $total_gravado=0;
+      $total_exento=0;
+      $total_pago=0;
+      if($cuen_ss > 0)
+      {
+        while ($row_detalle = _fetch_array($sql_detalles))
+        {
+          $id_producto = $row_detalle["id_prod_serv"];
+          $cantidad = $row_detalle["cantidad"];
+          $precio = $row_detalle["precio_venta"];
+          $gravado = $row_detalle["subtotal"];
+          $exento = $row_detalle["exento"];
+          $presentacion = $row_detalle["id_presentacion"];
+          $sql_pres = _query("SELECT p.nombre, pp.descripcion,pp.unidad FROM presentacion_producto as pp , presentacion as p WHERE pp.id_pp = '$presentacion' AND pp.id_presentacion = p.id_presentacion ");
+          $cue = _num_rows($sql_pres);
+          $row_press = _fetch_array($sql_pres);
+
+          $cantidad = $cantidad/$row_press['unidad'];
+          $sub = $precio * $cantidad;
+          if($exento == 0)
+          {
+            $total_gravado = $total_gravado + round($sub,2);
+          }
+          else
+          {
+            $total_exento =  $total_exento + round($sub,2);
+          }
+        }
+      }
+
+      if(round($total_gravado+$total_exento,2)==0)
+      {
+        $total_gravado=0.15;
+        $total_exento=0;
+      }
+      $total_exento_g= $total_exento_g + round($total_exento,2);
+      $total_gravado_g= $total_gravado_g + round($total_gravado,2);
+    }
+
+    $array = array(
+      "exento" => round($total_exento_g,2),
+      "gravado" => round($total_gravado_g, 2),
+      "total" => round($total_gravado_g+$total_exento_g,2),
+    );
+
+    return $array;
+  }
+  else
+  {
+    $array = array(
+      "exento" => round(0,2),
+      "gravado" => round(0, 2),
+      "total" => round(0,2),
+    );
+    return $array;
+  }
+}

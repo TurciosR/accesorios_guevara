@@ -18,6 +18,7 @@ function initial() {
 	$_PAGE ['links'] .= '<link href="css/plugins/dataTables/dataTables.tableTools.min.css" rel="stylesheet">';
 	$_PAGE ['links'] .= '<link href="css/animate.css" rel="stylesheet">';
 	$_PAGE ['links'] .= '<link href="css/style.css" rel="stylesheet">';
+  $_PAGE ['links'] .= '<link href="css/plugins/select2/select2.css" rel="stylesheet">';
 	include_once "header.php";
 	include_once "main_menu.php";
 	$id_sucursal=$_SESSION['id_sucursal'];
@@ -61,8 +62,20 @@ function initial() {
 											</select>
 										</div>
 									</div>
-									<div class="col-md-4">
-
+									<div class="col-lg-4">
+										<div class="form-group has-info single-line">
+											<label>Caja</label>
+											<select class="select caja" style="width:100%" id="caja" name="caja">
+												<?php
+												$sql = _query("SELECT * FROM caja where id_sucursal=$_SESSION[id_sucursal]");
+												while ($row=_fetch_array($sql)) {
+												?>
+												<option value="<?=$row['id_caja'] ?>"><?=$row['nombre'] ?></option>
+												<?php
+												}
+												 ?>
+											</select>
+										</div>
 									</div>
 									<div class="col-md-4">
 										<div class="form-group has-info ">
@@ -73,7 +86,7 @@ function initial() {
 									</div>
 								</div>
 							</section>
-							<section>
+							<section hidden>
 								<table class="table table-striped table-bordered table-hover" id="">
 									<thead>
 										<th class="col-lg-1">N°</th>
@@ -106,7 +119,30 @@ function initial() {
 			</div><!--div class='wrapper wrapper-content  animated fadeInRight'-->
 			<?php
 			include("footer.php");
-			echo" <script type='text/javascript' src='js/funciones/tike_dia.js'></script>";
+			//echo" <script type='text/javascript' src='js/funciones/tike_dia.js'></script>";
+			?>
+			<script type="text/javascript">
+
+
+			$(document).ready(function() {
+				$("#caja").select2();
+				$("#submit").click(function()
+				{
+					cargar();
+				})
+			});
+
+		function cargar()
+		{
+			var fecha = $("#fecha").val();
+			var id_sucursal = $("#id_sucursal").val();
+			var caja = $("#caja").val();
+
+			var cadena = "reporte_ticket.php?fecha="+fecha+"&id_sucursal="+id_sucursal+"&caja="+caja;
+			window.open(cadena, '', '');
+		}
+			</script>
+			<?php
 		} //permiso del script
 		else {
 			echo "<div></div><br><br><div class='alert alert-warning'>No tiene permiso para este modulo.</div>";

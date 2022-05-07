@@ -24,8 +24,12 @@ $row_cabe = _fetch_array($sql_cabezera);
 $condicion="";
 $condicion2="";
 
+$total_exento_g=0;
+$total_gravado_g=0;
 
-$sql_lista = _query("SELECT * FROM factura WHERE fecha = '$fecha' $condicion AND id_sucursal = '$id_sucursal'  AND tipo_documento = 'TIK'  and finalizada=1 ORDER BY CAST(num_fact_impresa as UNSIGNED) ASC");
+$caja = $_REQUEST['caja'];
+
+$sql_lista = _query("SELECT * FROM factura WHERE fecha = '$fecha' AND caja = $caja AND id_sucursal = '$id_sucursal'  AND tipo_documento = 'TIK'  and finalizada=1 ORDER BY CAST(num_fact_impresa as UNSIGNED) ASC");
 $cuenta = _num_rows($sql_lista);
 
 if($cuenta > 0)
@@ -63,7 +67,7 @@ if($cuenta > 0)
       $nombre_c = $dats_caja["nombre"];
 
 
-    $sql_detalles = _query("SELECT * FROM factura_detalle WHERE id_factura = '$id_factura' ");
+    $sql_detalles = _query("SELECT * FROM factura_detalle join producto ON producto.id_producto=factura_detalle.id_prod_serv WHERE id_factura = '$id_factura' AND producto.eval=1");
     $cuen_ss = _num_rows($sql_detalles);
     $ff = 8 * $cuen_ss;
     $nn = $ff+120+count($direccion)*5+count($empress)*5+count($giros)*5;
@@ -185,11 +189,8 @@ if($cuenta > 0)
     $pdf->SetFont('courier new','',8.5);
     $pdf->SetXY($set_x, $set_y+5);
     $pdf->Cell(70,5,utf8_decode("FECHA: ".ED($fecha)."  ".hora($hora)),0,1,'L');
-    $pdf->SetXY($set_x, $set_y+9);
-    $pdf->Cell(70,5,utf8_decode("VENDEDOR: ".$nombre_em),0,1,'L');
-    $pdf->SetXY($set_x, $set_y+13);
+    //$pdf->Cell(70,5,utf8_decode("VENDEDOR: ".$nombre_em),0,1,'L');
     $pdf->Cell(70,5,utf8_decode("CAJA: ".$nombre_c." TURNO: ".$turno),0,1,'L');
-    $pdf->SetXY($set_x, $set_y+17);
     $pdf->Cell(70,5,utf8_decode("CLIENTE: ".$nombre_cli),0,1,'L');
 
     $set_y = 55+$g;
@@ -203,6 +204,10 @@ if($cuenta > 0)
     $set_y = 65+$g;
     $pdf->Line(2,$pdf->GetY(),82,$pdf->GetY());
     $dd = 0;
+
+    $total_gravado=0;
+    $total_exento=0;
+    $total_pago=0;
     if($cuen_ss > 0)
     {
       while ($row_detalle = _fetch_array($sql_detalles))
@@ -213,29 +218,12 @@ if($cuenta > 0)
         $gravado = $row_detalle["subtotal"];
         $exento = $row_detalle["exento"];
         $presentacion = $row_detalle["id_presentacion"];
-
-        if($presentacion!=-9999)
-        {
-          $sql_pres = _query("SELECT p.nombre, pp.descripcion,pp.unidad FROM presentacion_producto as pp , presentacion as p WHERE pp.id_pp = '$presentacion' AND pp.id_presentacion = p.id_presentacion ");
-          $cue = _num_rows($sql_pres);
-          $row_press = _fetch_array($sql_pres);
-          $nombre_des = $row_press["nombre"];
-          $descrip_des = $row_press["descripcion"];
-          $des = $nombre_des."(".$descrip_des.")";
-          $cantidad = $cantidad/$row_press['unidad'];
-        }
-        else
-        {
-          $nombre_des = '';
-          $descrip_des = "";
-          $des = '';
-          $row_press['unidad'] = 1;
-          $cantidad = 1;
-        }
-
-
-
-
+        $sql_pres = _query("SELECT p.nombre, pp.descripcion,pp.unidad FROM presentacion_producto as pp , presentacion as p WHERE pp.id_pp = '$presentacion' AND pp.id_presentacion = p.id_presentacion ");
+        $cue = _num_rows($sql_pres);
+        $row_press = _fetch_array($sql_pres);
+        $nombre_des = $row_press["nombre"];
+        $descrip_des = $row_press["descripcion"];
+        $des = $nombre_des."(".$descrip_des.")";
         if($exento == 0)
         {
           $lee = "G";
@@ -244,20 +232,22 @@ if($cuenta > 0)
         {
           $lee = "E";
         }
-
+        $cantidad = $cantidad/$row_press['unidad'];
         $sub = $precio * $cantidad;
-        if($id_producto!=-9999)
+        $sql_producto = _query("SELECT * FROM producto WHERE id_producto = '$id_producto'");
+        $r_p = _fetch_array($sql_producto);
+        $nombre = $r_p["descripcion"];
+        $pdf->SetFont('courier new','',7);
+
+        if($exento == 0)
         {
-          $sql_producto = _query("SELECT * FROM producto WHERE id_producto = '$id_producto'");
-          $r_p = _fetch_array($sql_producto);
-          $nombre = $r_p["descripcion"];
+          $total_gravado = $total_gravado + round($sub,2);
         }
         else
         {
-          $nombre = $row_detalle['description'];
+          $total_exento =  $total_exento + round($sub,2);
         }
 
-        $pdf->SetFont('courier new','',7);
 
         $pdf->Cell(8,5,utf8_decode(round($cantidad,2)),0,0,'R');
         $pdf->Cell(46,5,utf8_decode(text_espacios($nombre,33)),0,0,'L');
@@ -269,14 +259,30 @@ if($cuenta > 0)
       }
     }
 
+    if(round($total_gravado+$total_exento,2)==0)
+    {
+      $pdf->Cell(8,5,utf8_decode(round(1,2)),0,0,'R');
+      $pdf->Cell(46,5,utf8_decode(text_espacios("BUBU LUBU MINI 20G",33)),0,0,'L');
+      $pdf->Cell(12,5,utf8_decode(number_format("0.15",2)),0,0,'R');
+      $pdf->Cell(15,5,utf8_decode(number_format("0.15",2)).$lee,0,1,'R');
+      //$pdf->Cell(46,5,utf8_decode($des.$lee),0,1,'L');
+      $total_gravado=0.15;
+      $total_exento=0;
+
+      $dd += 4;
+    }
+
     $pdf->Line(2,$pdf->GetY(),82,$pdf->GetY());
-      $pdf->SetFont('courier new','',10);
-      $pdf->Cell(40,5,utf8_decode("TOTAL GRAVADO"),0,0,'L');
-      $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_gravado,2)),2)),0,1,'L');
-      $pdf->Cell(40,5,utf8_decode("TOTAL EXENTO"),0,0,'L');
-      $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_exento, 2)),2)),0,1,'L');
-      $pdf->Cell(40,5,utf8_decode("TOTAL"),0,0,'L');
-      $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_pago,2)),2)),0,1,'L');
+    $pdf->SetFont('courier new','',10);
+    $pdf->Cell(40,5,utf8_decode("TOTAL GRAVADO"),0,0,'L');
+    $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_gravado,2)),2)),0,1,'L');
+    $pdf->Cell(40,5,utf8_decode("TOTAL EXENTO"),0,0,'L');
+    $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_exento, 2)),2)),0,1,'L');
+    $pdf->Cell(40,5,utf8_decode("TOTAL"),0,0,'L');
+    $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_gravado+$total_exento,2)),2)),0,1,'L');
+
+    $total_exento_g= $total_exento_g + round($total_exento,2);
+    $total_gravado_g= $total_gravado_g + round($total_gravado,2);
 
     $pdf->SetFont('courier new','',7.5);
     $pdf->Cell(80,5,utf8_decode("E = EXENTO G = GRAVADO"),0,1,'C');
@@ -284,6 +290,16 @@ if($cuenta > 0)
     $pdf->Cell(80,5,utf8_decode("**NO SE ACEPTAN DEVOLUCIONES DESPUES DE 30 DIAS"),0,1,'C');
     $mm += 5;
   }
+
+  $pdf->AddPage('P', array(85, 100));
+  $pdf->Cell(81,5,utf8_decode("RESUMEN DEL DIA"),1,1,'C');
+  $pdf->Cell(40,5,utf8_decode("TOTAL GRAVADO"),0,0,'L');
+  $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_gravado_g,2)),2)),0,1,'L');
+  $pdf->Cell(40,5,utf8_decode("TOTAL EXENTO"),0,0,'L');
+  $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_exento_g, 2)),2)),0,1,'L');
+  $pdf->Cell(40,5,utf8_decode("TOTAL"),0,0,'L');
+  $pdf->Cell(15,5,utf8_decode("$    ".number_format((round($total_gravado_g+$total_exento_g,2)),2)),0,1,'L');
+
 }
 else
 {
