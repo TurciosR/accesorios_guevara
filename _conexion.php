@@ -1,6 +1,6 @@
 <?php
 $username = "root";
-$password = "admin$2022**.";
+$password = "1234";
 //$password = "";
 $hostname = "localhost";
 $dbname = "accesorios_guevara";

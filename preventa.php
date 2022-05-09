@@ -142,19 +142,32 @@ a {
                             </div>
                         </div>
                         <div class="row">
-
+                            <!-- SELECCION DE VENDEDOR -->
                             <div class="form-group col-md-2">
+                                <div class="form-group has-info">
+                                    <label>Seleccione Vendedor</label>
+                                    <select class="form-control select usage" name="id_empleado" id="id_empleado">
+                                        <option value="">Seleccione</option>
+                                        <?php
+                                          $sql_empleado=_query("SELECT * FROM empleado WHERE id_sucursal='$id_sucursal' ORDER BY nombre");
+                                          while ($row_empleado = _fetch_array($sql_empleado))
+                                          {
+                                            echo "<option value='".$row_empleado["id_empleado"]."'";
+                                            echo ">".$row_empleado["nombre"]."</option>";
+                                          } 
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- <div class="form-group col-md-2">
                                 <div class="form-group has-info">
                                     <label>Referencia</label>
                                     <input type="text" class="form-control" id="num_ref" name="num_ref" value="">
 
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-md-3 form-group">
                                 <label>Referencia</label>
-                                <!--
-                        <input type="text" name="n_ref" id="n_ref" class="form-control usage" style="border-radius:0px;">
-                      -->
                                 <select class="form-control select_r" name="n_ref" id="n_ref">
                                     <option value="0">Seleccione</option>
                                     <?php

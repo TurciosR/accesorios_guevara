@@ -99,40 +99,40 @@ function initial()
   ?>
 
 <style media="screen">
-.sweet-alert i {
-    color: #FF0000;
-}
+  .sweet-alert i {
+      color: #FF0000;
+  }
 
-.swstyle {
-    font-size: 27px;
-    color: #FF0000;
-    font-weight: bolder;
-}
+  .swstyle {
+      font-size: 27px;
+      color: #FF0000;
+      font-weight: bolder;
+  }
 
-.inf {
-    color: gray;
-}
+  .inf {
+      color: gray;
+  }
 </style>
 <style media="screen">
-span.select2-container--open {
-    z-index: 9999 !important;
-}
+  span.select2-container--open {
+      z-index: 9999 !important;
+  }
 
-#inventable tr td {
-    font-size: 12px;
-}
+  #inventable tr td {
+      font-size: 12px;
+  }
 
-#inventable input {
-    height: 28px;
-    font-size: 12px;
-    margin: 0px;
+  #inventable input {
+      height: 28px;
+      font-size: 12px;
+      margin: 0px;
 
-}
+  }
 
-.Delete>input,
-a {
-    height: 28px;
-}
+  .Delete>input,
+  a {
+      height: 28px;
+  }
 </style>
 
 <div class="gray-bg">
@@ -175,8 +175,8 @@ a {
 
                             <div class="col-md-7"><br>
 
-                                <a class="btn btn-sm btn-warning pull-right" style="margin-left:1%;" id='abrir'><i
-                                        class="fa fa-check"></i> Abrir</a>
+                                <!-- <a class="btn btn-sm btn-warning pull-right" style="margin-left:1%;" id='abrir'><i
+                                        class="fa fa-check"></i> Abrir</a> -->
                                 <a class="btn btn-sm btn-danger pull-right" style="margin-left:1%;" href="dashboard.php"
                                     id='salir'><i class="fa fa-mail-reply"></i> F4 Salir</a>
                                 <button type="button" id="preventa" style="margin-left:1%;" name="preventa"
@@ -214,111 +214,111 @@ a {
                     </div>
                         </div>
                         <div class="row">
-
-                            <div class="form-group col-md-1">
-                                <div class="form-group has-info">
-                                    <label>Referencia</label>
-                                    <input type="text" class="form-control" id="num_ref" name="num_ref" value="">
-
-                                </div>
-                            </div>
-                            <div class="col-md-3 form-group">
-                                <label>Referencia</label>
-                                <!--
-                    <input type="text" name="n_ref" id="n_ref" class="form-control usage" style="border-radius:0px;">
-                  -->
-                                <select class="form-control select_r" name="n_ref" id="n_ref">
-                                    <option value="0">Seleccione</option>
-                                    <?php
-                    $fecha_actual = date("Y-m-d");
-                    $sql="SELECT cliente.nombre, factura.total,numero_ref FROM factura LEFT JOIN cliente ON cliente.id_cliente=factura.id_cliente WHERE numero_ref!=0 AND fecha='".date("Y-m-d")."' AND finalizada!=1 AND factura.id_sucursal=$id_sucursal";
-
-                    $result=_query($sql);
-                    $cuenta = _num_rows($result);
-                    echo _error();
-                    if ($cuenta > 0) {
-                      while ($row = _fetch_array($result)) {
-                        echo "<option value='".$row['numero_ref']."'>";
-                        echo "".$row['numero_ref']." | ";
-                        echo "".utf8_decode(Mayu(utf8_decode($row['nombre'])))." | ";
-                        echo "$".number_format($row['total'], 2)."";
-                        echo "</option>";
-                      }
-                    } ?>
-                                </select>
-                            </div>
-
-                            <div hidden class="form-group col-md-2">
+                            <!-- SELECCION DE VENDEDOR -->
+                            <div class="form-group col-md-2">
                                 <div class="form-group has-info">
                                     <label>Seleccione Vendedor</label>
-                                    <input type="text" name="vendedor" id="vendedor" value="">
-                                    <?php
-                    ?>
+                                    <select class="form-control select usage" name="id_empleado" id="id_empleado">
+                                        <option value="">Seleccione</option>
+                                        <?php
+                                          $sql_empleado=_query("SELECT * FROM empleado WHERE id_sucursal='$id_sucursal' ORDER BY nombre");
+                                          while ($row_empleado = _fetch_array($sql_empleado))
+                                          {
+                                            echo "<option value='".$row_empleado["id_empleado"]."'";
+                                            echo ">".$row_empleado["nombre"]."</option>";
+                                          } 
+                                        ?>
                                     </select>
                                 </div>
                             </div>
+                            <!-- SELECCION DE LAS REFERENCIAS DE PREVENTAS ALMACENADAS -->
+                            <div class="col-md-2 form-group">
+                                <label>Referencia</label>
+                                <select class="form-control select_r" name="n_ref" id="n_ref">
+                                    <option value="0">Seleccione</option>
+                                    <?php
+                                      $fecha_actual = date("Y-m-d");
+                                      $sql="SELECT cliente.nombre, factura.total,numero_ref 
+                                        FROM factura LEFT JOIN cliente 
+                                        ON cliente.id_cliente=factura.id_cliente 
+                                        WHERE numero_ref!=0 AND fecha='".date("Y-m-d")."' 
+                                        AND finalizada!=1 AND factura.id_sucursal=$id_sucursal";
+
+                                      $result=_query($sql);
+                                      $cuenta = _num_rows($result);
+                                      echo _error();
+                                      if ($cuenta > 0) {
+                                        while ($row = _fetch_array($result)) {
+                                          echo "<option value='".$row['numero_ref']."'>";
+                                          echo "".$row['numero_ref']." | ";
+                                          echo "".utf8_decode(Mayu(utf8_decode($row['nombre'])))." | ";
+                                          echo "$".number_format($row['total'], 2)."";
+                                          echo "</option>";
+                                        }
+                                      } 
+                                    ?>
+                                </select>
+                            </div>
+                            <!-- SELECCION DE CLIENTE -->
                             <div id='form_datos_cliente' class="form-group col-md-3">
                                 <div class="form-group has-info">
                                     <label>Cliente&nbsp;</label>
                                     <select class="form-control select usage" name="id_cliente" id="id_cliente">
                                         <?php
-                    $sqlcli=_query("SELECT * FROM cliente WHERE id_sucursal='$id_sucursal' ORDER BY nombre");
-                    while ($row_cli = _fetch_array($sqlcli))
-                    {
-                      echo "<option value='".$row_cli["id_cliente"]."'";
-                      if($id_cliente_bd != "")
-                      {
-                        if ($row_cli["id_cliente"] == $id_cliente_bd)
-                        {
-                          echo " selected ";
-                        }
-                        else
-                        {
-                          if ($row_cli["id_cliente"] == -1)
-                          {
-                            echo " selected ";
-                          }
-                        }
-                      }
-                      else {
-                        // code...
-                        if ($row_cli["id_cliente"] == -1)
-                        {
-                          echo " selected ";
-                        }
-                      }
+                                          $sqlcli=_query("SELECT * FROM cliente WHERE id_sucursal='$id_sucursal' ORDER BY nombre");
+                                          while ($row_cli = _fetch_array($sqlcli))
+                                          {
+                                            echo "<option value='".$row_cli["id_cliente"]."'";
+                                            if($id_cliente_bd != "")
+                                            {
+                                              if ($row_cli["id_cliente"] == $id_cliente_bd)
+                                              {
+                                                echo " selected ";
+                                              }
+                                              else
+                                              {
+                                                if ($row_cli["id_cliente"] == -1)
+                                                {
+                                                  echo " selected ";
+                                                }
+                                              }
+                                            }
+                                            else {
+                                              // code...
+                                              if ($row_cli["id_cliente"] == -1)
+                                              {
+                                                echo " selected ";
+                                              }
+                                            }
 
-                      echo ">".$row_cli["nombre"]."</option>";
-                    } ?>
+                                            echo ">".$row_cli["nombre"]."</option>";
+                                          } 
+                                        ?>
                                     </select>
                                 </div>
                             </div>
+                            <!-- SELECCION DE TIPO DE IMPRESION -->
                             <div class="form-group col-md-2">
                                 <div class="form-group has-info">
                                     <label>Tipo Impresi&oacuten</label>
                                     <select name='tipo_impresion' id='tipo_impresion' class='select form-control usage'>
-                                        <!--
-                    <option value='TIK' selected>COBRO</option>
-                  -->
                                         <option value='TIK'>TICKET</option>
                                         <option value='COF'>FACTURA</option>
                                         <option value='CCF'>CREDITO FISCAL</option>
                                     </select>
                                 </div>
                             </div>
+                            <!-- SELECCION DE TIPO DE PAGO -->
                             <div class="col-md-2">
                                 <div class="form-group has-info">
                                     <label>Seleccione tipo de pago</label><br>
                                     <select name='con_pago' id='con_pago' class='select form-control usage'>
                                         <option value='0' selected>Contado</option>
                                         <option value='1'>Credito</option>
-                                         <!--
-                                         <option value='2'>Tarjeta Agricola 3%</option>
-                                         <option value='3'>Tarjeta Otro Banco 5%</option>
-                                        -->
                                     </select>
                                 </div>
                             </div>
+                            <!-- CAMPO DE INGRESO DE AUTORIZACION -->
                             <div class="form-group col-md-1">
                                 <div class="form-group has-info">
                                     <label>Autorización</label>
@@ -326,7 +326,6 @@ a {
                                         value="">
                                 </div>
                             </div>
-
                         </div>
                         <!--load datables estructure html-->
                         <header>
@@ -697,7 +696,7 @@ a {
                                     </div>
                                     <?php
 
-                echo "<input type='hidden' name='id_empleado' id='id_empleado' >";
+                //echo "<input type='hidden' name='id_empleado' id='id_empleado' >";
                 echo "<input type='hidden' name='numero_doc' id='numero_doc' >";
                 echo "<input type='hidden' name='id_factura' id='id_factura' >";
                 echo "<input type='hidden' name='urlprocess' id='urlprocess' value='$filename'>"; ?>
@@ -1584,9 +1583,9 @@ function insertar()
       'retencion'=>$retencion,
       'venta_exenta'=>$venta_exenta,
       'total_menos_retencion'=>$total_menos_retencion,
-      'total' => $total,/*
+      'total' => $total,
       'id_usuario'=>$id_empleado,
-      'id_empleado' => $id_vendedor,*/
+      'id_empleado' => $id_vendedor,
       'id_sucursal' => $id_sucursal,
       'tipo' => $tipo_entrada_salida,
       'serie' => $serie,
@@ -2486,7 +2485,7 @@ function insertar_preventa()
     $clave=$_REQUEST['clave'];
   }
 
-  $id_vendedor=$_SESSION['id_usuario'];
+  $id_vendedor=$_POST['id_vendedor'];
   $cuantos = $_POST['cuantos'];
   $array_json=$_POST['json_arr'];
   //  IMPUESTOS

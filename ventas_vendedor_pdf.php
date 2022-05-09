@@ -99,7 +99,11 @@ while(strtotime($fk) <= strtotime($fin))
 {
 
 $fecha_actual = $fk;
-$sql="SELECT DISTINCT factura.id_empleado,usuario.usuario, empleado.nombre FROM factura JOIN usuario ON usuario.id_usuario=factura.id_empleado LEFT JOIN empleado ON empleado.id_empleado=usuario.id_empleado WHERE factura.fecha='$fecha_actual'";
+$sql="SELECT DISTINCT factura.id_empleado, usuario.usuario, empleado.nombre 
+FROM factura 
+JOIN usuario ON usuario.id_empleado = factura.id_empleado
+JOIN empleado ON factura.id_empleado = empleado.id_empleado
+WHERE factura.fecha='$fecha_actual'";
 
 
 $result=_query($sql);

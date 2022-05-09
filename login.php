@@ -7,7 +7,10 @@ if($_POST){
 	require_once "_conexion.php";
 	$user=$_POST["username"];
 	$pass=MD5($_POST["password"]);
-	$sql = "SELECT usuario.*, empleado.id_tipo_empleado FROM usuario LEFT JOIN empleado ON empleado.id_empleado=usuario.id_empleado WHERE  usuario = '$user' AND password ='$pass'";
+	$sql = "SELECT usuario.*, empleado.id_tipo_empleado 
+		FROM usuario LEFT JOIN empleado 
+		ON empleado.id_empleado=usuario.id_empleado 
+		WHERE  usuario = '$user' AND password ='$pass'";
 	$result = _query($sql);
 	$num = _num_rows($result);
 	if($num > 0){
