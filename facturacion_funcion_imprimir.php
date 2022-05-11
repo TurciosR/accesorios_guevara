@@ -42,8 +42,8 @@ function print_ticket($id_factura)
 	if($nrows_fact>0){
 		$id_cliente=$row_fact['id_cliente'];
 		$id_factura = $row_fact['id_factura'];
-		$id_usuario=$row_fact['id_usuario'];
-		$id_vendedor=$row_fact['id_empleado'];
+		$id_usuario=$row_fact['id_usuario']; //CAJERO 
+		$id_vendedor=$row_fact['id_empleado']; //VENDEDOR SELECCIONADO
 		$fecha=$row_fact['fecha'];
 		$hora=$row_fact['hora'];
 		$caja=$row_fact['caja'];
@@ -107,6 +107,7 @@ function print_ticket($id_factura)
 		$info_factura.=$esp_init."FECHA RESOLUCION ".$fehca."\n";
 		$info_factura.=$esp_init."TIQUETE # ".$num_fact."|"."\n";
 		$info_factura.=$esp_init."FECHA: ".$fecha_fact." ".hora($hora)."\n";
+		$info_factura.=$esp_init."CAJERO: ".$empleado."\n";
 		$info_factura.=$esp_init."VENDEDOR: ".$vendedor."\n";
 		$info_factura.=$esp_init."CAJA : ".$caja. "  TURNO: ".$turno."\n";
 		$info_factura.=$esp_init."CLIENTE: ".$nombre_ape."|"."\n";
@@ -354,6 +355,7 @@ function print_ticket_dev($id_factura)
 		$info_factura.=$esp_init."FECHA RESOLUCION ".$fehca."\n";*/
 		$info_factura.=$esp_init."DEVOLUCION TIQUETE # ".$num_fact."|";
 		$info_factura.=$esp_init."FECHA: ".$fecha_fact." ".hora($hora)."\n";
+		$info_factura.=$esp_init."CAJERO: ".$empleado."\n";
 		$info_factura.=$esp_init."VENDEDOR: ".$vendedor."\n";
 		$info_factura.=$esp_init."CAJA : ".$caja. "  TURNO: ".$turno."\n";
 		$info_factura.=$esp_init."CLIENTE: ".$nombre_ape."|";
@@ -2435,19 +2437,21 @@ function datos_clientes($id_cliente){
 	return $result;
 }
 function datos_empleado($id_empleado,$id_vendedor){
-	//Obtener informacion de tabla Cliente
+	//Obtener informacion del cajero
 	$sql="select * from usuario where id_usuario='$id_empleado'";
 	$result= _query($sql);
 	$row=_fetch_array($result);
-	$empleado=$row['nombre'];
+	$empleado=$row['nombre']; //Obtenemos el nombre del cajero
 
-	$sql2="select empleado.* from empleado join usuario ON usuario.id_empleado=empleado.id_empleado where id_usuario='$id_vendedor'";
+	//Obtener informacion del vendedor seleccionado
+	$sql2="select * from empleado where id_empleado='$id_vendedor'";
+
 	$result2= _query($sql2);
 	$vendedor="";
 	if(_num_rows($result2)>0)
 	{
 		$row2=_fetch_array($result2);
-		$vendedor=$row2['nombre'];
+		$vendedor=$row2['nombre'];//Obtenemos el nombre del vendedor seleccionado
 	}
 	else {
 		// code...
