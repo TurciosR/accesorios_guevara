@@ -110,13 +110,14 @@ a {
                         <input type="hidden" id="fecha" value="<?php echo $fecha_actual; ?>">
                         <div class="row focuss"><br>
                             <div class="form-group col-md-5">
-                                <div id="a">
+                                <div class="row">
+                                <div id="a" class='col-md-9'>
                                     <label>Buscar Producto (Código)</label>
                                     <input type="text" id="codigo" name="codigo" style="width:100% !important"
                                         class="form-control usage" placeholder="Ingrese Código de producto"
                                         style="border-radius:0px">
                                 </div>
-                                <div hidden id="b">
+                                <div hidden id="b" class='col-md-9'>
                                     <label id='buscar_habilitado'>Buscar Producto (Descripción)</label>
                                     <div id="scrollable-dropdown-menu">
                                         <input type="text" id="producto_buscar" name="producto_buscar"
@@ -124,6 +125,12 @@ a {
                                             placeholder="Ingrese la Descripción de producto" data-provide="typeahead"
                                             style="border-radius:0px">
                                     </div>
+                                </div>
+                                <div class='col-md-3'><br>
+                                        <button type="button" id="change" style="margin-top:5%;" name="change"
+                                            class="btn btn-sm btn-success pull-right usage"><i
+                                                class="fa fa-exchange"></i> F3 Descripción</button>
+                                </div>
                                 </div>
                             </div>
                             <div class="form-group col-md-1">
