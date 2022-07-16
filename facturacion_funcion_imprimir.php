@@ -1851,11 +1851,9 @@ function print_vale($id_movimiento)
 	return ($info_factura);
 
 }
-/**
- * Funcion donde se define los parametros y contenido de los cortes
- **/
-function print_corte($id_corte)
-{
+
+
+function print_corte($id_corte){
 	include_once "_core.php";
 	//EMPRESA
 	$id_sucursal=$_SESSION['id_sucursal'];
@@ -1870,9 +1868,8 @@ function print_corte($id_corte)
 	$nrc=$row_empresa['nrc'];
 	//sucursal
 	$sql_sucursal=_query("SELECT * FROM sucursal WHERE id_sucursal='$id_sucursal'");
-	$array_sucursal =_fetch_array($sql_sucursal);
-	$nombre_sucursal = $array_sucursal['descripcion'];
-	$direccion = $array_sucursal['direccion'];
+	$array_sucursal=_fetch_array($sql_sucursal);
+	$nombre_sucursal=$array_sucursal['descripcion'];
 	//consulta
 	$sql_t=_fetch_array(_query("SELECT controlcaja.id_empleado FROM controlcaja WHERE controlcaja.id_corte=$id_corte"));
 	$id_c=$sql_t['id_empleado'];
@@ -1885,7 +1882,8 @@ function print_corte($id_corte)
 		c.cashinicial, c.vtacontado, c.vtaefectivo, c.vtatcredito, c.totalgral, c.subtotal, c.cashfinal, c.diferencia,
 		c.totalnodev, c.totalnoanu, c.depositos, c.vales, c.tarjetas, c.depositon, c.valen, c.tarjetan, c.ingresos,
 		c.tcredito, c.ncortex, c.ncortez, c.ncortezm, c.cerrado, c.id_empleado, c.id_sucursal, c.id_apertura,
-		c.fecha_corte, c.hora_corte, c.tipo_corte,e.nombre, c.monto_ch, c.tiket, c.turno, c.retencion
+		c.fecha_corte, c.hora_corte, c.tipo_corte,e.nombre, c.monto_ch, c.tiket, c.turno, c.retencion,
+		c.tot_ventas_credito, c.tot_pago_tarjeta, c.tot_pago_bitcoin, c.tot_pago_transf
 		FROM controlcaja AS c
 		JOIN usuario AS e ON(e.id_usuario=c.id_empleado)
 		WHERE c.id_corte='$id_corte'";
@@ -1898,7 +1896,8 @@ function print_corte($id_corte)
 		c.cashinicial, c.vtacontado, c.vtaefectivo, c.vtatcredito, c.totalgral, c.subtotal, c.cashfinal, c.diferencia,
 		c.totalnodev, c.totalnoanu, c.depositos, c.vales, c.tarjetas, c.depositon, c.valen, c.tarjetan, c.ingresos,
 		c.tcredito, c.ncortex, c.ncortez, c.ncortezm, c.cerrado, c.id_empleado, c.id_sucursal, c.id_apertura,
-		c.fecha_corte, c.hora_corte, c.tipo_corte,em.nombre, c.monto_ch, c.tiket, c.turno, c.retencion
+		c.fecha_corte, c.hora_corte, c.tipo_corte,em.nombre, c.monto_ch, c.tiket, c.turno, c.retencion,
+		c.tot_ventas_credito, c.tot_pago_tarjeta, c.tot_pago_bitcoin, c.tot_pago_transf
 		FROM controlcaja AS c
 		JOIN usuario AS e ON(e.id_usuario=c.id_empleado)
 		LEFT JOIN empleado as em on(e.id_empleado=em.id_empleado)
@@ -1910,7 +1909,6 @@ function print_corte($id_corte)
 	$row = _fetch_array($result);
 	$id_empleado = $row["id_empleado"];
 	$nombre_emp = $row["nombre"];
-
 
 	$result_emp= datos_empleado($id_c,$id_c);
 	list($al,$nombre_emp)=explode('|',$result_emp);
@@ -1939,7 +1937,17 @@ function print_corte($id_corte)
 	$tike = $row['tiket'];
 	$turno = $row["turno"];
 	$retencion= $row['retencion'];
+
+	/**
+	 * TOTALIZADO OTROS PAGOS
+	 */
+	$tot_ventas_credito = $row['tot_ventas_credito'];
+	$tot_pago_tarjeta = $row['tot_pago_tarjeta'];
+	$tot_pago_bitcoin = $row['tot_pago_bitcoin'];
+	$tot_pago_transf = $row['tot_pago_transf'];
+
 	$id_apertura=$row['id_apertura'];
+
 	$sql_caja = _query("SELECT * FROM caja WHERE id_caja='$caja'");
 	$dats_caja = _fetch_array($sql_caja);
 	$fehca = ED($dats_caja["fecha"]);
@@ -1947,6 +1955,7 @@ function print_corte($id_corte)
 	$serie = $dats_caja["serie"];
 	$desde = $dats_caja["desde"];
 	$hasta = $dats_caja["hasta"];
+
 	$texento= sprintf('%.2f', $row["texento"]);
 	$tgravado= sprintf('%.2f', $row["tgravado"]);
 	$totalt=  sprintf('%.2f', $row["totalt"]);
@@ -1962,6 +1971,7 @@ function print_corte($id_corte)
 	$cashini= sprintf('%.2f', $cashini);
 	$ingresos= sprintf('%.2f', $ingresos);
 	$monto_ch = sprintf('%.2f', $monto_ch);
+
 	$vales=sprintf('%.2f', $vales);
 	$cashfinal= sprintf('%.2f', $cashfinal);
 	$diferencia= sprintf('%.2f', $diferencia);
@@ -1988,15 +1998,13 @@ function print_corte($id_corte)
 	{
 		$info_factura.=$esp_init.trim($giros[$ni])."\n";
 	}
-	$info_factura.=$direccion."\n";
-	$info_factura.="PABLO JOSUE SEGOVIA PEÑA\n";
+	//$info_factura.=$esp_init0."SUCURSAL ".$nombre_sucursal."\n";
 	$info_factura.=$esp_init0."CORTE TIPO: ".$desc_tipo."\n";
-	$info_factura.=$esp_init0."RESOLUCION:  ".$resolucion."\n";
+	/*$info_factura.=$esp_init0."RESOLUCION:  ".$resolucion."\n";
 	$info_factura.=$esp_init0."DEL ".$desde." AL ".$hasta."\n";
 	$info_factura.=$esp_init0."SERIE ".$serie."\n";
-	$info_factura.=$esp_init0."FECHA RESOLUCION ".$fehca."\n";
-	$info_factura.=$esp_init."TIQUETE # ".$tike."\n";
-	//$info_factura.=$esp_init0."CORTE DE CAJA  : ".$id_corte."|";
+	$info_factura.=$esp_init0."FECHA RESOLUCION ".$fehca."\n";*/
+	$info_factura.=$esp_init0."CORTE DE CAJA  : ".$id_corte."|";
 	$info_factura.=$line1;
 	$info_factura.=$esp_init."FECHA: ".$fecha."  HORA:".hora($hora)."\n";
 	$info_factura.=$esp_init."EMPLEADO: ".$nombre_emp."\n";
@@ -2055,7 +2063,7 @@ function print_corte($id_corte)
 		  }
 			$info_factura.=$line1;
 			$sp1=len_num($total_cobros,$n);
-			$info_factura.=$esp_init0."(+) COBROS CREDITO $:         ".$sp1.number_format($total_cobros, 2, '.', ',')."\n";
+			$info_factura.=$esp_init0."(+) COBROS CREDITO $:".$sp1.number_format($total_cobros, 2, '.', ',')."\n";
 		}
 
 		$totalcaja = $totalcaja + $total_cobros;
@@ -2067,6 +2075,18 @@ function print_corte($id_corte)
 		$sp1=len_num(number_format($retencion,2,".",""),$n);
 		$info_factura.=$esp_init0."(-) RETENCION $:    ".str_pad(number_format($retencion,2,".",""),11," ",STR_PAD_LEFT)."\n";
 
+		/**
+		 * TOTALIZADO OTROS PAGOS
+		 */
+		$sp1=len_num(number_format($tot_ventas_credito,2,".",""),$n);
+		$info_factura.=$esp_init0."(-) VENTAS AL CREDITO $:".str_pad(number_format($tot_ventas_credito,2,".",""),7," ",STR_PAD_LEFT)."\n";
+		$sp1=len_num(number_format($tot_pago_tarjeta,2,".",""),$n);
+		$info_factura.=$esp_init0."(-) PAGOS TARJETA $:".str_pad(number_format($tot_pago_tarjeta,2,".",""),11," ",STR_PAD_LEFT)."\n";
+		$sp1=len_num(number_format($tot_pago_bitcoin,2,".",""),$n);
+		$info_factura.=$esp_init0."(-) PAGOS BITCOIN $:".str_pad(number_format($tot_pago_bitcoin,2,".",""),11," ",STR_PAD_LEFT)."\n";
+		$sp1=len_num(number_format($tot_pago_transf,2,".",""),$n);
+		$info_factura.=$esp_init0."(-) PAGOS TRANSFER. $:".str_pad(number_format($tot_pago_transf,2,".",""),9," ",STR_PAD_LEFT)."\n";
+
 
 		$sql_dev="SELECT sum(t_devolucion) as total FROM devoluciones_corte WHERE id_corte='$id_corte' AND tipo!='CCF'";
 		$result_dev =_query($sql_dev);
@@ -2074,7 +2094,7 @@ function print_corte($id_corte)
 		if($nrow_dev>0)
 		{
 			$row_dev = _fetch_array($result_dev);
-			$info_factura.=$esp_init0."(-)DEVOLUCIONES$:   ".str_pad(number_format($row_dev['total'],2,".",""),11," ",STR_PAD_LEFT)."\n";
+			$info_factura.=$esp_init0."(-) DEVOLUCIONES $:   ".str_pad(number_format($row_dev['total'],2,".",""),9," ",STR_PAD_LEFT)."\n";
 			/*$info_factura.=$esp_init0."  NUMERO   DOC     AFECTA      TOTAL"."\n";
 			for($j=0;$j<$nrow_dev;$j++){
 
@@ -2181,14 +2201,13 @@ function print_corte($id_corte)
 		}
 	}
 
-	if($tipo=="X" || $tipo=="Z")
-	{
+	if($tipo=="X" || $tipo=="Z"){
 		//listar devoluciones
 		/*$sql_dev="SELECT id_devolucion, id_corte, n_devolucion, t_devolucion FROM devoluciones WHERE id_corte='$id_corte'";
 		$result_dev =_query($sql_dev);
 		$nrow_dev = _num_rows($result_dev);*/
 
-
+		$info_factura.=$esp_init."TIQUETE # ".$tike."\n\n";
 		$subtotal=$cashini+$vtaefectivo+$ingresos;
 		$totalcaja=$subtotal-$vales;
 		$tot_exent=$texento+$fexento+$cfexento;
@@ -2201,27 +2220,6 @@ function print_corte($id_corte)
 		$totalcaja=sprintf('%.2f', $totalcaja);
 		$esp_init1 = "       ";
 		$esp_init0 = "";
-		$info_factura.="\n\n";
-		$info_factura.=$esp_init1."   INICIO   FINAL   TOTAL"."\n";
-		$info_factura.=$line1;
-		$n=4;
-		$total_docs=$totalnot+$totalnof+$totalnocf;
-		$sp1=len_num($tinicio,$n);
-		$sp2=len_num($tfinal,$n);
-		$sp3=len_num($totalnot,$n);
-		$info_factura.=$esp_init0."TIQUETES: ".$sp1.$tinicio.$sp2.$tfinal.$sp3.$totalnot."\n";
-		$sp1=len_num($finicio,$n);
-		$sp2=len_num($ffinal,$n);
-		$sp3=len_num($totalnof,$n);
-		$info_factura.=$esp_init0."FACTURAS:   ".esp_text($finicio,6)."  ".esp_text($ffinal,6).$sp3.$totalnof."\n";
-		$sp1=len_num($cfinicio,$n);
-		$sp2=len_num($cffinal,$n);
-		$sp3=len_num($totalnocf,$n);
-		$info_factura.=$esp_init0."FISCALES:   ".esp_text($cfinicio,6)."  ".esp_text($cffinal,6).$sp3.$totalnocf."\n";
-		$info_factura.=$line1;
-		$sp1=len_num($total_docs,24);
-		$info_factura.=$esp_init0."TOTAL:".$sp1.$total_docs."\n";
-		$info_factura.="\n";
 		$info_factura.=$esp_init1."       EXEN.  GRAV.  TOTAL"."\n";
 		$info_factura.=$line1;
 		$n=4;
@@ -2245,46 +2243,62 @@ function print_corte($id_corte)
 		$info_factura.=$esp_init0."TOTAL $ :".$sp1.$tot_exent.$sp2.$tot_grav.$sp3.$tot_fin."\n";
 		$info_factura.="\n";
 
-
+		$info_factura.=$esp_init1."   INICIO   FINAL   TOTAL"."\n";
+		$info_factura.=$line1;
+		$n=4;
+		$total_docs=$totalnot+$totalnof+$totalnocf;
+		$sp1=len_num($tinicio,$n);
+		$sp2=len_num($tfinal,$n);
+		$sp3=len_num($totalnot,$n);
+		$info_factura.=$esp_init0."TIQUETES: ".$sp1.$tinicio.$sp2.$tfinal.$sp3.$totalnot."\n";
+		$sp1=len_num($finicio,$n);
+		$sp2=len_num($ffinal,$n);
+		$sp3=len_num($totalnof,$n);
+		$info_factura.=$esp_init0."FACTURAS:   ".esp_text($finicio,6)."  ".esp_text($ffinal,6).$sp3.$totalnof."\n";
+		$sp1=len_num($cfinicio,$n);
+		$sp2=len_num($cffinal,$n);
+		$sp3=len_num($totalnocf,$n);
+		$info_factura.=$esp_init0."FISCALES:   ".esp_text($cfinicio,6)."  ".esp_text($cffinal,6).$sp3.$totalnocf."\n";
+		$info_factura.=$line1;
+		$sp1=len_num($total_docs,24);
+		$info_factura.=$esp_init0."TOTAL:".$sp1.$total_docs."\n";
+		$info_factura.="\n";
 
 		/*if($nrow_dev>0){
-		$info_factura.=$esp_init0."DEVOLUCIONES   :"."\n";
-		$info_factura.=$esp_init0."  NUMERO   TOTAL"."\n";
-		for($j=0;$j<$nrow_dev;$j++){
+			$info_factura.=$esp_init0."DEVOLUCIONES   :"."\n";
+			$info_factura.=$esp_init0."  NUMERO   TOTAL"."\n";
+			for($j=0;$j<$nrow_dev;$j++){
+				$row_dev = _fetch_array($result_dev);
+				$n_devolucion=$row_dev['n_devolucion'];
+				$t_devolucion=$row_dev['t_devolucion'];
+				$sp1=len_num($n_devolucion,$n);
+				$sp2=len_num($t_devolucion,$n);
+				$info_factura.=$esp_init0.$sp1.$n_devolucion.$sp2.$t_devolucion."\n";
+				//$info_factura.=$esp_init0."TOTAL   :".$sp1.$total_docs."\n";
+			}
+			$info_factura.="\n";
+		}*/
+		//listar devoluciones de nota de credito
+		/*$sql_ncr="SELECT id_nc, id_corte, n_nc, t_nc, afecta, tipo FROM nc_corte WHERE id_corte='$id_corte'";
+		$result_ncr =_query($sql_ncr);
+		$nrow_ncr = _num_rows($result_ncr);
+		if($nrow_ncr>0){
+			$info_factura.=$esp_init0."DEVOLUCION NOTA CREDITO   :"."\n";
+			$info_factura.=$esp_init0."  NUMERO   TOTAL"."\n";
+			for($k=0;$k<$nrow_ncr;$k++){
 
-		$row_dev = _fetch_array($result_dev);
-		$n_devolucion=$row_dev['n_devolucion'];
-		$t_devolucion=$row_dev['t_devolucion'];
-		$sp1=len_num($n_devolucion,$n);
-		$sp2=len_num($t_devolucion,$n);
-		$info_factura.=$esp_init0.$sp1.$n_devolucion.$sp2.$t_devolucion."\n";
-		//$info_factura.=$esp_init0."TOTAL   :".$sp1.$total_docs."\n";
+				$row_ncr = _fetch_array($result_ncr);
+				$n_dev=$row_ncr['n_nc'];
+				$t_dev=$row_ncr['t_nc'];
+				$sp1=len_num($n_dev,$n);
+				$sp2=len_num($t_dev,$n);
+				$info_factura.=$esp_init0.$sp1.$n_dev.$sp2.$t_dev."\n";
+			}
+			$info_factura.="\n";
+		}*/
 	}
 	$info_factura.="\n";
-}*/
-//listar devoluciones de nota de credito
-/*$sql_ncr="SELECT id_nc, id_corte, n_nc, t_nc, afecta, tipo FROM nc_corte WHERE id_corte='$id_corte'";
-$result_ncr =_query($sql_ncr);
-$nrow_ncr = _num_rows($result_ncr);
-if($nrow_ncr>0){
-$info_factura.=$esp_init0."DEVOLUCION NOTA CREDITO   :"."\n";
-$info_factura.=$esp_init0."  NUMERO   TOTAL"."\n";
-for($k=0;$k<$nrow_ncr;$k++){
-
-$row_ncr = _fetch_array($result_ncr);
-$n_dev=$row_ncr['n_nc'];
-$t_dev=$row_ncr['t_nc'];
-$sp1=len_num($n_dev,$n);
-$sp2=len_num($t_dev,$n);
-$info_factura.=$esp_init0.$sp1.$n_dev.$sp2.$t_dev."\n";
-}
-$info_factura.="\n";
-}*/
-}
-$info_factura.="\n";
-return ($info_factura);
-
-
+	return ($info_factura);
 }
 
 function len_num($subtotal,$col3){
@@ -2436,6 +2450,7 @@ function datos_clientes($id_cliente){
 	$result= _query($sql);
 	return $result;
 }
+
 function datos_empleado($id_empleado,$id_vendedor){
 	//Obtener informacion del cajero
 	$sql="select * from usuario where id_usuario='$id_empleado'";
@@ -2461,6 +2476,7 @@ function datos_empleado($id_empleado,$id_vendedor){
 	$empleado_vendedor=	$empleado."|".$vendedor;
 	return $empleado_vendedor;
 }
+
 function empresa(){
 	//Empresa
 	$sql_empresa = "SELECT * FROM sucursal where id_sucursal=$_SESSION[id_sucursal]";

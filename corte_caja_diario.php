@@ -29,7 +29,10 @@ function initial() {
 	$id_user=$_SESSION["id_usuario"];
 	$admin=$_SESSION["admin"];
 	$aper_id = $_REQUEST["aper_id"];
-	$sql_apertura = _query("SELECT * FROM apertura_caja WHERE id_apertura = '$aper_id' AND vigente = 1 AND id_sucursal = '$id_sucursal'");
+	$sql_apertura = _query("SELECT * FROM apertura_caja 
+	    WHERE id_apertura = '$aper_id' 
+        AND vigente = 1 
+        AND id_sucursal = '$id_sucursal'");
 	$cuenta = _num_rows($sql_apertura);
 	$row_apertura = _fetch_array($sql_apertura);
 	$id_apertura = $row_apertura["id_apertura"];
@@ -52,19 +55,71 @@ function initial() {
 	$n_credito_fiscal = 0;
 	$n_dev = 0;
 
-	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) AS total_devoluciones FROM factura JOIN factura AS f ON f.id_factura=factura.afecta WHERE factura.tipo_documento ='DEV' AND factura.id_apertura_pagada=$aper_id"));
+	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_devoluciones FROM factura 
+        JOIN factura AS f ON f.id_factura=factura.afecta 
+        WHERE factura.tipo_documento ='DEV' 
+        AND factura.id_apertura_pagada=$aper_id"));
 	$monto_dev=$sql_monto_dev['total_devoluciones'];
 
-	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) AS total_devoluciones FROM factura JOIN factura AS f ON f.id_factura=factura.afecta WHERE factura.tipo_documento ='NC' AND factura.id_apertura_pagada=$aper_id"));
+	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_devoluciones FROM factura 
+        JOIN factura AS f ON f.id_factura=factura.afecta 
+        WHERE factura.tipo_documento ='NC' 
+        AND factura.id_apertura_pagada=$aper_id"));
 	$monto_nc=$sql_monto_dev['total_devoluciones'];
 
-	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.retencion) AS total_retencion FROM factura WHERE id_apertura_pagada=$aper_id AND credito=0"));
+	$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.retencion) 
+        AS total_retencion FROM factura 
+        WHERE id_apertura_pagada=$aper_id 
+        AND credito=0"));
 	$monto_retencion=$sql_monto_dev['total_retencion'];
+
+
+	/**
+     * OBTENIENDO TOTAL VENTAS AL CREDITO
+     */
+    $sql_ventas_credito=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_credito FROM factura 
+        WHERE id_apertura_pagada=$aper_id 
+        AND credito=1"));
+	$monto_ventas_credito=$sql_ventas_credito['total_credito'];
+
+    /**
+     * OBTENIENDO TOTAL PAGOS CON TARJETA
+     */
+    $sql_monto_tarjeta=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_tarjeta FROM factura 
+        WHERE id_apertura_pagada=$aper_id 
+        AND credito=2"));
+	$monto_pago_tarjeta=$sql_monto_tarjeta['total_tarjeta'];
+
+    /**
+     * OBTENIENDO TOTAL PAGOS CON BITCOIN
+     */
+    $sql_monto_bitcoin=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_bitcoin FROM factura 
+        WHERE id_apertura_pagada=$aper_id 
+        AND credito=3"));
+	$monto_pago_bitcoin=$sql_monto_bitcoin['total_bitcoin'];
+
+    /**
+     * OBTENIENDO TOTAL PAGOS CON TRANSFERENCIA
+     */
+    $sql_monto_transferencia=_fetch_array(_query("SELECT SUM(factura.total) 
+        AS total_transferencia FROM factura 
+        WHERE id_apertura_pagada=$aper_id 
+        AND credito=4"));
+	$monto_pago_transferencia=$sql_monto_transferencia['total_transferencia'];
 
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	$sql_caja = _query("SELECT * FROM mov_caja WHERE fecha = '$fecha_apertura' AND id_apertura = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND id_sucursal = '$id_sucursal'");
+	$sql_caja = _query("SELECT * FROM mov_caja 
+        WHERE fecha = '$fecha_apertura' 
+        AND id_apertura = '$id_apertura' 
+        AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+        AND id_sucursal = '$id_sucursal'");
 
 	$cuenta_caja = _num_rows($sql_caja);
 
@@ -76,7 +131,13 @@ function initial() {
 	$total_factura_npago = 0;
 	$total_credito_fiscal_npago = 0;
 
-	$sql_pendiente = _query("SELECT * FROM factura WHERE fecha = '$fecha_actual'  AND id_sucursal = '$id_sucursal' AND anulada = 0 AND credito != '0' AND finalizada = 0 AND credito=0");
+	$sql_pendiente = _query("SELECT * FROM factura 
+        WHERE fecha = '$fecha_actual'  
+        AND id_sucursal = '$id_sucursal' 
+        AND anulada = 0 
+        AND credito != '0' 
+        AND finalizada = 0 
+        AND credito=0");
 	$cuenta1 = _num_rows($sql_pendiente);
 
 	if($cuenta1 > 0)
@@ -111,9 +172,34 @@ function initial() {
 	}
 	//echo "SELECT * FROM factura WHERE fecha = '$fecha_apertura' AND id_apertura = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND id_sucursal = '$id_sucursal' AND anulada = 0";
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, MAX(numero_doc) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND id_apertura_pagada = '$id_apertura' AND credito=0 AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%TIK%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-												 UNION ALL SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura'  AND credito=0 AND id_apertura_pagada = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%COF%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-												 UNION ALL SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND credito=0 AND id_apertura_pagada = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%CCF%' AND id_sucursal = '$id_sucursal' AND anulada = 0" );
+	$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, MAX(numero_doc) as maximo 
+                            FROM factura WHERE fecha = '$fecha_apertura' 
+                            AND id_apertura_pagada = '$id_apertura' 
+                            
+                            AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                            AND numero_doc LIKE '%TIK%' 
+                            AND id_sucursal = '$id_sucursal' 
+                            AND anulada = 0
+                            UNION ALL 
+                            SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, 
+                            MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo 
+                            FROM factura WHERE fecha = '$fecha_apertura'  
+                            
+                            AND id_apertura_pagada = '$id_apertura' 
+                            AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                            AND numero_doc LIKE '%COF%' 
+                            AND id_sucursal = '$id_sucursal' 
+                            AND anulada = 0
+                            UNION ALL 
+                            SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, 
+                            MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo 
+                            FROM factura WHERE fecha = '$fecha_apertura' 
+                            
+                            AND id_apertura_pagada = '$id_apertura' 
+                            AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                            AND numero_doc LIKE '%CCF%' 
+                            AND id_sucursal = '$id_sucursal' 
+                            AND anulada = 0" );
 
 	$cuenta_min_max = _num_rows($sql_min_max);
 
@@ -257,7 +343,13 @@ function initial() {
 	$t_tike_2 = 0;
 	$t_factuta_2 = 0;
 	$t_credito_2 = 0;
-	$sql_corte_caja = _query("SELECT * FROM factura WHERE fecha = '$fecha_apertura' AND id_sucursal = '$id_sucursal' AND anulada = 0 AND finalizada = 1 AND id_apertura_pagada ='$id_apertura' AND credito=0");
+	$sql_corte_caja = _query("SELECT * FROM factura 
+        WHERE fecha = '$fecha_apertura' 
+        AND id_sucursal = '$id_sucursal' 
+        AND anulada = 0 
+        AND finalizada = 1 
+        AND id_apertura_pagada ='$id_apertura'
+        ");
 	$cuenta_caja = _num_rows($sql_corte_caja);
 	if($cuenta_caja > 0)
 	{
@@ -333,9 +425,10 @@ function initial() {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//$total_devolucion = $total_dev_g + $total_dev_e;
 
+    $total_otros_pagos = $monto_pago_tarjeta + $monto_pago_bitcoin + $monto_pago_transferencia + $monto_ventas_credito;
 	$total_nopagado = $total_tike_npago + $total_factura_npago + $total_credito_fiscal_npago;
 	$total_corte_2 = $total_tike_2 + $total_factura_2 + $total_credito_fiscal_2 + $monto_apertura + $total_entrada_caja  + $monto_ch;
-	$total_corte_2=round($total_corte_2,2);
+	$total_corte_2 = round($total_corte_2 - $total_otros_pagos,2);
 	$total_caja_chica = $monto_ch + $total_entrada_caja - $total_salida_caja;
 	$total_caja_chica=round($total_caja_chica,2);
 
@@ -493,6 +586,22 @@ function initial() {
 										<tr>
 											<td colspan="4">MONTO CAJA CHICA</td>
 											<td><label id="id_total12"><?php echo number_format($monto_ch,2,".",",");?></label></td>
+										</tr>
+										<tr>
+											<td colspan="4">(-VENTAS AL CREDITO)</td>
+											<td><label id="id_totalre"><?php echo number_format($monto_ventas_credito,2,".",",");?></label></td>
+										</tr>
+                                        <tr>
+											<td colspan="4">(-PAGOS TARJETA)</td>
+											<td><label id="id_totalre"><?php echo number_format($monto_pago_tarjeta,2,".",",");?></label></td>
+										</tr>
+                                        <tr>
+											<td colspan="4">(-PAGOS BITCOIN)</td>
+											<td><label id="id_totalre"><?php echo number_format($monto_pago_bitcoin,2,".",",");?></label></td>
+										</tr>
+                                        <tr>
+											<td colspan="4">(-PAGOS TRANSFERENCIA)</td>
+											<td><label id="id_totalre"><?php echo number_format($monto_pago_transferencia,2,".",",");?></label></td>
 										</tr>
 										<tr>
 											<td colspan="4">(-RETENCION)</td>
@@ -762,6 +871,12 @@ function initial() {
 										<input type="hidden" name="lista_dev" id="lista_dev" value="<?php print_r($lista_dev);?>">
 										<input type="hidden" name="lista_nc" id="lista_nc" value="<?php print_r($lista_nc);?>">
 										<input type="hidden" name="retencion" id="retencion" value="<?php echo $monto_retencion;?>">
+										
+										<!-- TOTALIZADO DEL DETALLE DE OTROS PAGOS -->
+										<input type="hidden" name="ventas_al_credito" id="ventas_al_credito" value="<?php echo $monto_ventas_credito;?>">
+										<input type="hidden" name="pago_tarjeta" id="pago_tarjeta" value="<?php echo $monto_pago_tarjeta;?>">
+										<input type="hidden" name="pago_bitcoin" id="pago_bitcoin" value="<?php echo $monto_pago_bitcoin;?>">
+										<input type="hidden" name="pago_transferencia" id="pago_transferencia" value="<?php echo $monto_pago_transferencia;?>">
 
 
 										<input type="hidden" name="t_tike" id="t_tike" value="<?php echo $t_tike_2;?>">
@@ -819,7 +934,7 @@ function initial() {
 			echo "<br><br><div class='alert alert-warning'>No tiene permiso para este modulo.</div><div></div></div></div></div></div>";
 			include_once ("footer.php");
 		}
-	}
+}
 
 	function corte()
 	{
@@ -868,10 +983,19 @@ function initial() {
 		$monto_ch = $_POST["monto_ch"];
 		$caja = $_POST["caja_apertura"];
 		$retencion=$_POST['retencion'];
+
+		/**
+		 * OTROS PAGOS
+		 */
+		$tot_ventas_credito = $_POST['ventas_al_credito'];
+		$tot_pago_tarjeta = $_POST['pago_tarjeta'];
+		$tot_pago_bitcoin = $_POST['pago_bitcoin'];
+		$tot_pago_transf = $_POST['pago_transferencia'];
+
 		$sql_cajax = _query("SELECT correlativo_dispo FROM caja WHERE id_caja = '$caja'");
 		$rc = _fetch_array($sql_cajax);
 		$correlativo_dispo = $rc["correlativo_dispo"];
-		$nn_tik = $correlativo_dispo; ## Para el cambio solicitado, no sumamos al correlativo disponible.
+		$nn_tik = $correlativo_dispo + 1;
 		//$tike = $total_tike_e + $total_tike_g;
 		//$factura = $total_factura_e + $total_factura_g;
 		//$credito = $total_credito_fiscal_e + $total_credito_fiscal_g;
@@ -917,6 +1041,10 @@ function initial() {
 			'monto_ch' => $monto_ch,
 			'caja' => $caja,
 			'retencion' => $retencion,
+			'tot_ventas_credito' => $tot_ventas_credito,
+			'tot_pago_tarjeta' => $tot_pago_tarjeta,
+			'tot_pago_bitcoin' => $tot_pago_bitcoin,
+			'tot_pago_transf' => $tot_pago_transf,
 		);
 		$id_cortex="";
 		$sql_ = _query("SELECT * FROM controlcaja WHERE id_apertura = '$id_apertura' AND tipo_corte = 'Z'");
@@ -1055,10 +1183,7 @@ function initial() {
 			}
 			else if($tipo_corte == "Z")
 			{
-				/*Cambio a solicitud del cliente: Que el correlativo del corte Z. 
-				sea el mismo del ultimo ticket emitido.*/
-				//$extra = array('tiket' => $correlativo_dispo ,);
-				$extra = array('tiket' => $tike_max ,);
+				$extra = array('tiket' => $correlativo_dispo ,);
 				$resultx = array_merge($form_data, $extra);
 				$table_apertura = "apertura_caja";
 				$form_up = array(
@@ -1107,10 +1232,7 @@ function initial() {
 							}
 
 
-							$sql_devoluciones=_query("SELECT factura.numero_doc,factura.total,
-								f.tipo_documento,f.num_fact_impresa as doc 
-								FROM factura JOIN factura AS f ON f.id_factura=factura.afecta 
-								WHERE factura.tipo_documento ='NC' AND factura.id_apertura_pagada=$id_apertura");
+							$sql_devoluciones=_query("SELECT factura.numero_doc,factura.total,f.tipo_documento,f.num_fact_impresa as doc FROM factura JOIN factura AS f ON f.id_factura=factura.afecta WHERE factura.tipo_documento ='NC' AND factura.id_apertura_pagada=$id_apertura");
 							$i=1;
 							while ($row_de=_fetch_array($sql_devoluciones)) {
 								# code...
@@ -1184,15 +1306,83 @@ function initial() {
 			$tipo_corte = $_POST["tipo_corte"];
 			$aper_id = $_POST["aper_id"];
 
-			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) AS total_devoluciones FROM factura JOIN factura AS f ON f.id_factura=factura.afecta WHERE factura.tipo_documento ='DEV' AND factura.id_apertura_pagada=$aper_id"));
+			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) 
+            AS total_devoluciones FROM factura 
+            JOIN factura AS f ON f.id_factura=factura.afecta 
+            WHERE factura.tipo_documento ='DEV' 
+            AND factura.id_apertura_pagada=$aper_id"));
 			$monto_dev=$sql_monto_dev['total_devoluciones'];
 
-			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) AS total_devoluciones FROM factura JOIN factura AS f ON f.id_factura=factura.afecta WHERE factura.tipo_documento ='NC' AND factura.id_apertura_pagada=$aper_id"));
+			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.total) 
+            AS total_devoluciones FROM factura 
+            JOIN factura AS f ON f.id_factura=factura.afecta 
+            WHERE factura.tipo_documento ='NC' 
+            AND factura.id_apertura_pagada=$aper_id"));
 			$monto_nc=$sql_monto_dev['total_devoluciones'];
 
-			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.retencion) AS total_retencion FROM factura WHERE id_apertura_pagada=$aper_id AND credito=0"));
+			$sql_monto_dev=_fetch_array(_query("SELECT SUM(factura.retencion) 
+            AS total_retencion 
+            FROM factura 
+            WHERE id_apertura_pagada=$aper_id 
+            AND credito=0"));
 			$monto_retencion=$sql_monto_dev['total_retencion'];
 			$monto_retencion=round($monto_retencion,2);
+
+			/**
+			 * OBTENIENDO TOTAL DE ENTRADAS EN CAJA
+			 */
+			$sql_entradas_caja = _fetch_array(_query(
+				"SELECT SUM(valor) as total_entradas 
+				FROM `mov_caja` 
+				WHERE id_apertura = $aper_id AND entrada = 1 "
+			));
+			$monto_entradas_caja = $sql_entradas_caja['total_entradas'];
+			$monto_entradas_caja = round($monto_entradas_caja, 2);
+
+			/**
+             * OBTENIENDO TOTAL VENTAS AL CREDITO
+             */
+            $sql_ventas_credito=_fetch_array(_query("SELECT SUM(factura.total) 
+            AS total_credito FROM factura 
+            WHERE id_apertura_pagada=$aper_id 
+            AND credito=1"));
+            $monto_ventas_credito=$sql_ventas_credito['total_credito'];
+            $monto_ventas_credito=round($monto_ventas_credito,2);
+
+            /**
+             * OBTENIENDO TOTAL PAGOS CON TARJETA
+             */
+            $sql_monto_tarjeta=_fetch_array(_query("SELECT SUM(factura.total) 
+            AS total_tarjeta FROM factura 
+            WHERE id_apertura_pagada=$aper_id 
+            AND credito=2"));
+            $monto_pago_tarjeta=$sql_monto_tarjeta['total_tarjeta'];
+            $monto_pago_tarjeta=round($monto_pago_tarjeta,2);
+
+            /**
+             * OBTENIENDO TOTAL PAGOS CON BITCOIN
+             */
+            $sql_monto_bitcoin=_fetch_array(_query("SELECT SUM(factura.total) 
+                AS total_bitcoin FROM factura 
+                WHERE id_apertura_pagada=$aper_id 
+                AND credito=3"));
+            $monto_pago_bitcoin=$sql_monto_bitcoin['total_bitcoin'];
+            $monto_pago_bitcoin=round($monto_pago_bitcoin,2);
+
+            /**
+             * OBTENIENDO TOTAL PAGOS CON TRANSFERENCIA
+             */
+            $sql_monto_transferencia=_fetch_array(_query("SELECT SUM(factura.total) 
+                AS total_transferencia FROM factura 
+                WHERE id_apertura_pagada=$aper_id 
+                AND credito=4"));
+            $monto_pago_transferencia=$sql_monto_transferencia['total_transferencia'];
+            $monto_pago_transferencia=round($monto_pago_transferencia,2);
+
+            /**
+             * Haciendo la suma total de otros pagos
+             */
+            $total_otros_pagos = $monto_pago_tarjeta + $monto_pago_bitcoin + $monto_pago_transferencia + $monto_ventas_credito;
 
 			date_default_timezone_set('America/El_Salvador');
 			$fecha_actual=date("Y-m-d");
@@ -1236,9 +1426,33 @@ function initial() {
 
 			if($tipo_corte == "Z" || $tipo_corte == "X")
 			{
-				$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, MAX(numero_doc) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND id_apertura = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%TIK%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-				UNION ALL SELECT MIN(CONVERT(CONVERT(num_fact_impresa,UNSIGNED INTEGER),UNSIGNED INTEGER)) as minimo, MAX(CONVERT(CONVERT(num_fact_impresa,UNSIGNED INTEGER),UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND id_apertura = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%COF%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-				UNION ALL SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND id_apertura = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%CCF%' AND id_sucursal = '$id_sucursal' AND anulada = 0" );
+				$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, 
+                    MAX(numero_doc) as maximo FROM factura 
+                    WHERE fecha = '$fecha_apertura' 
+                    AND id_apertura = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                    AND numero_doc LIKE '%TIK%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0
+				    UNION ALL 
+                    SELECT MIN(CONVERT(CONVERT(num_fact_impresa,UNSIGNED INTEGER),UNSIGNED INTEGER)) as minimo, 
+                    MAX(CONVERT(CONVERT(num_fact_impresa,UNSIGNED INTEGER),UNSIGNED INTEGER)) as maximo 
+                    FROM factura WHERE fecha = '$fecha_apertura' 
+                    AND id_apertura = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                    AND numero_doc LIKE '%COF%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0
+				    UNION ALL 
+                    SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, 
+                    MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo 
+                    FROM factura WHERE fecha = '$fecha_apertura' 
+                    AND id_apertura = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                    AND numero_doc LIKE '%CCF%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0" 
+                );
 				$cuenta_min_max = _num_rows($sql_min_max);
 
 				if($cuenta_min_max)
@@ -1408,9 +1622,38 @@ function initial() {
 			}
 			else
 			{
-				$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, MAX(numero_doc) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND credito=0 AND id_apertura_pagada = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%TIK%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-				UNION ALL SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND credito=0 AND id_apertura_pagada = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%COF%' AND id_sucursal = '$id_sucursal' AND anulada = 0
-				UNION ALL SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo FROM factura WHERE fecha = '$fecha_apertura' AND credito=0 AND id_apertura_pagada = '$id_apertura' AND hora BETWEEN '$hora_apertura' AND '$hora_actual' AND numero_doc LIKE '%CCF%' AND id_sucursal = '$id_sucursal' AND anulada = 0");
+				$sql_min_max = _query("SELECT MIN(numero_doc) as minimo, 
+                    MAX(numero_doc) as maximo 
+                    FROM factura WHERE fecha = '$fecha_apertura' 
+                    
+                    AND id_apertura_pagada = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' AND '$hora_actual' 
+                    AND numero_doc LIKE '%TIK%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0
+				    UNION ALL 
+                    SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, 
+                    MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo 
+                    FROM factura WHERE fecha = '$fecha_apertura' 
+                    
+                    AND id_apertura_pagada = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' 
+                    AND '$hora_actual' 
+                    AND numero_doc LIKE '%COF%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0
+				    UNION ALL 
+                    SELECT MIN(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as minimo, 
+                    MAX(CONVERT(num_fact_impresa,UNSIGNED INTEGER)) as maximo 
+                    FROM factura WHERE fecha = '$fecha_apertura' 
+                    
+                    AND id_apertura_pagada = '$id_apertura' 
+                    AND hora BETWEEN '$hora_apertura' 
+                    AND '$hora_actual' 
+                    AND numero_doc LIKE '%CCF%' 
+                    AND id_sucursal = '$id_sucursal' 
+                    AND anulada = 0"
+                );
 				$cuenta_min_max = _num_rows($sql_min_max);
 
 				if($cuenta_min_max)
@@ -1502,7 +1745,13 @@ function initial() {
 						$i += 1;
 					}
 				}
-				$sql_corte_caja = _query("SELECT * FROM factura WHERE fecha = '$fecha_apertura' AND id_sucursal = '$id_sucursal' AND anulada = 0 AND finalizada = 1 AND credito=0 AND id_apertura_pagada = '$id_apertura'");
+				$sql_corte_caja = _query("SELECT * FROM factura 
+                WHERE fecha = '$fecha_apertura' 
+                AND id_sucursal = '$id_sucursal' 
+                AND anulada = 0 
+                AND finalizada = 1 
+                 
+                AND id_apertura_pagada = '$id_apertura'");
 				$cuenta_caja = _num_rows($sql_corte_caja);
 				if($cuenta_caja > 0)
 				{
@@ -1602,10 +1851,15 @@ function initial() {
 			$xdatos['monto_apertura'] = round($monto_apertura,2);
 			$xdatos['monto_ch'] = round($monto_ch,2);
 			$xdatos['monto_retencion'] = round($monto_retencion,2);
+			$xdatos['monto_ventas_credito'] = round($monto_ventas_credito,2);
+            $xdatos['monto_pago_tarjeta'] = round($monto_pago_tarjeta,2);
+            $xdatos['monto_pago_bitcoin'] = round($monto_pago_bitcoin,2);
+            $xdatos['monto_pago_transferencia'] = round($monto_pago_transferencia,2);
+			$xdatos['total_entradas_caja'] = round($monto_entradas_caja,2);
 			if ($tipo_corte == "C")
 			{
 				# code...
-				$xdatos['total_corte']=round(($total_corte+$monto_ch),2);
+				$xdatos['total_corte']=round(($total_corte+$monto_ch) - $total_otros_pagos,2);
 
 			}
 			else {

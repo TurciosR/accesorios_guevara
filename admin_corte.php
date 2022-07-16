@@ -1,4 +1,4 @@
- 	<?php
+<?php
   include ("_core.php");
 
 	function initial()
@@ -581,24 +581,24 @@
     $admin=1;
 		if ($links!='NOT' || $admin=='1' ){
 	?>
- 	<input type="hidden" name="admin" id="admin" value="<?php echo $admin;?>">
- 	<input type="hidden" name="id_emple" id="id_emple" value="<?php echo $id_user;?>">
- 	<div class="wrapper wrapper-content  animated fadeInRight">
- 	    <div class="row" id="row1">
- 	        <div class="col-lg-12">
- 	            <div class="ibox float-e-margins">
- 	                <!--?php
+	<input type="hidden" name="admin" id="admin" value="<?php echo $admin;?>">
+	<input type="hidden" name="id_emple" id="id_emple" value="<?php echo $id_user;?>">
+	<div class="wrapper wrapper-content  animated fadeInRight">
+		<div class="row" id="row1">
+			<div class="col-lg-12">
+				<div class="ibox float-e-margins">
+					<!--?php
 					echo"<div class='ibox-title'>
 						<a href='facturacion.php' class='btn btn-primary' role='button'><i class='fa fa-plus icon-large'></i> Agregar factura</a>
 						</div>";
 					?-->
- 	                <div class="ibox-content">
- 	                    <!--load datables estructure html-->
- 	                    <header>
- 	                        <h4>Administrar Cortes</h4>
- 	                    </header>
- 	                    <section>
- 	                        <?php
+					<div class="ibox-content">
+						<!--load datables estructure html-->
+						<header>
+							<h4>Administrar Cortes</h4>
+						</header>
+						<section>
+							<?php
 								$sql_apertura = _query("SELECT * FROM apertura_caja WHERE vigente = 1 AND id_sucursal = '$id_sucursal' AND id_empleado = '$id_user'");
                 //echo "SELECT * FROM apertura_caja WHERE vigente = 1 AND id_sucursal = '$id_sucursal' AND id_empleado = '$id_user'";
 								//echo "SELECT * FROM apertura_caja WHERE vigente = 1 AND id_sucursal = '$id_sucursal' AND id_empleado = '$id_user'";
@@ -623,15 +623,11 @@
                     else {
                       # code...
                       $sql_empleado = _query("SELECT empleado.nombre FROM usuario JOIN empleado ON usuario.id_empleado = empleado.id_empleado WHERE usuario.id_usuario = '$id_empleado'");
+
                     }
-					if(_num_rows($sql_empleado) > 0){
-						$rr = _fetch_array($sql_empleado);
-	    				$nombre = $rr["nombre"];
-					}
-					else{
-						$nombre = "ADMINISTRADOR";
-					}
-	    							
+
+	    							$rr = _fetch_array($sql_empleado);
+	    							$nombre = $rr["nombre"];
 	    							$turno_txt = "";
 										echo "<input type='hidden' id='aper_id' name='aper_id' value='".$id_apertura."'>";
 	    							/////////////////////////////////////////////////////////////////////////////////////////////
@@ -680,47 +676,41 @@
 									$total_corte = $total_tike + $total_factura + $total_credito_fiscal;
 	    						?>
 
- 	                        <div class="row">
- 	                            <input type="hidden" name="id_apertura" id="id_apertura"
- 	                                value="<?php echo $id_apertura;?>">
- 	                            <table class="table table-bordered">
- 	                                <thead>
- 	                                    <tr>
- 	                                        <th colspan="3" style="text-align: center"><label class="badge badge-success"
- 	                                                style="font-size: 15px; ">Apertura Vigente</label></th>
- 	                                    </tr>
- 	                                    <tr>
- 	                                        <th>Nombre: <?php echo $nombre;?></th>
- 	                                        <th>Fecha Apertura: <?php echo ED($fecha_apertura);?></th>
- 	                                        <th>Hora Apertura: <?php echo $hora_apertura;?></th>
- 	                                    </tr>
- 	                                    <tr>
- 	                                        <th>Monto Apertura: <?php echo "$".$monto_apertura;?></th>
- 	                                        <th>Turno: <?php echo $turno;?></th>
- 	                                        <th>Monto Registrado: <?php echo $total_corte;?></th>
- 	                                    </tr>
- 	                                    <?php
+			                        <div class="row">
+			                        <input type="hidden" name="id_apertura" id="id_apertura" value="<?php echo $id_apertura;?>">
+			                        	<table class="table table-bordered">
+			                        		<thead>
+			                        			<tr>
+			                        				<th colspan="3" style="text-align: center"><label class="badge badge-success" style="font-size: 15px; ">Apertura Vigente</label></th>
+			                        			</tr>
+			                        			<tr>
+			                        				<th>Nombre: <?php echo $nombre;?></th>
+			                        				<th>Fecha Apertura: <?php echo ED($fecha_apertura);?></th>
+			                        				<th>Hora Apertura: <?php echo $hora_apertura;?></th>
+			                        			</tr>
+			                        			<tr>
+			                        				<th>Monto Apertura: <?php echo "$".$monto_apertura;?></th>
+			                        				<th>Turno: <?php echo $turno;?></th>
+			                        				<th>Monto Registrado: <?php echo $total_corte;?></th>
+			                        			</tr>
+			                        			<?php
 			                        				$sql_d_ap = _query("SELECT * FROM detalle_apertura WHERE id_apertura = '$id_apertura' AND vigente = 1 AND id_usuario = '$id_user'");
 			                        				$cuenta_a = _num_rows($sql_d_ap);
 			                        				if($cuenta_a == 1)
 			                        				{
 				                        			?>
- 	                                    <tr>
- 	                                        <th colspan="3" style="text-align: center">
- 	                                            <a <?php echo "href='corte_caja_diario.php?aper_id=".$id_apertura."'";?>
- 	                                                id="generar_corte" name="generar_corte"
- 	                                                class="btn btn-primary m-t-n-xs"> Realizar Corte</a>
- 	                                            <?php if($turno_vigente == 1){?>
- 	                                            <a data-toggle='modal' id="cerrar_turno" name="cerrar_turno"
- 	                                                class="btn btn-primary m-t-n-xs"
- 	                                                <?php  echo "href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&val=0'"?>
- 	                                                data-target='#viewModal' data-refresh='true'>Cerrar Turno</a>
- 	                                            <?php
+				                        			<tr>
+				                        				<th colspan="3" style="text-align: center">
+				                        					<a <?php echo "href='corte_caja_diario.php?aper_id=".$id_apertura."'";?> id="generar_corte" name="generar_corte" class="btn btn-primary m-t-n-xs" > Realizar Corte</a>
+				                        					<!-- <?php if($turno_vigente == 1){?>
+				                        					<a data-toggle='modal' id="cerrar_turno" name="cerrar_turno" class="btn btn-primary m-t-n-xs" <?php  echo "href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&val=0'"?>
+																data-target='#viewModal' data-refresh='true' >Cerrar Turno</a>
+				                        					<?php
 				                        					}
-				                        					?>
- 	                                        </th>
- 	                                    </tr>
- 	                                    <?php
+				                        					?> -->
+				                        				</th>
+				                        			</tr>
+				                        			<?php
 			                        				}
 			                        				else
 			                        				{
@@ -764,7 +754,7 @@
 					                        					echo "</tr>";
 					                        					echo "<tr>";
 					                        					echo "<th colspan='3' style='text-align: center'>";
-					                        					echo "<a href='corte_caja_diario.php?aper_id=".$id_apertura."' id='generar_corte' name='generar_corte' class='btn btn-primary m-t-n-xs' > Realizar Corte</a> <a data-toggle='modal' id='cerrar_turno' name='cerrar_turno' class='btn btn-primary m-t-n-xs' href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&id_detalle=".$id_d_ap."&emp=".$emp."&val=1' data-target='#viewModal' data-refresh='true' >Cerrar Turno Vigente</a>";
+					                        					//echo "<a href='corte_caja_diario.php?aper_id=".$id_apertura."' id='generar_corte' name='generar_corte' class='btn btn-primary m-t-n-xs' > Realizar Corte</a> <a data-toggle='modal' id='cerrar_turno' name='cerrar_turno' class='btn btn-primary m-t-n-xs' href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&id_detalle=".$id_d_ap."&emp=".$emp."&val=1' data-target='#viewModal' data-refresh='true' >Cerrar Turno Vigente</a>";
 					                        					echo "</th>";
 					                        					echo "</tr>";
 							    							}
@@ -783,10 +773,10 @@
 			                        				}
 			                        			?>
 
- 	                                </thead>
- 	                            </table>
- 	                        </div>
- 	                        <?php
+			                        		</thead>
+			                        	</table>
+			                        </div>
+	    						<?php
 	    						}
 	    						else
 	    						{
@@ -794,13 +784,13 @@
 										{
 
 											?>
- 	                        <div class="">
- 	                            <table class="table table-bordered">
- 	                                <thead>
- 	                                    <tr>
- 	                                        <td>
- 	                                            <select class="select col-lg-6" name="id_caja" id="id_caja">
- 	                                                <?php
+											<div class="">
+												<table class="table table-bordered">
+													<thead>
+														<tr>
+															<td>
+															<select class="select col-lg-6" name="id_caja" id="id_caja">
+																<?php
 																		$sql_caja = _query("SELECT * FROM caja WHERE activa = 1 AND caja.id_sucursal=$_SESSION[id_sucursal] ORDER BY id_caja  ASC");
 																		while ($row_caja = _fetch_array($sql_caja))
 																		{
@@ -810,17 +800,17 @@
 																		}
 
 																?>
- 	                                            </select>
- 	                                        </td>
- 	                                    </tr>
- 	                                </thead>
- 	                            </table>
- 	                            <div id="caja_caja">
+															</select>
+															</td>
+														</tr>
+													</thead>
+												</table>
+												<div id="caja_caja">
 
- 	                            </div>
- 	                        </div>
- 	                        <input type="hidden" name="caja_id" id="caja_id" value="0">
- 	                        <?php
+												</div>
+											</div>
+                      <input type="hidden" name="caja_id" id="caja_id" value="0">
+											<?php
 
 
 										}
@@ -861,53 +851,50 @@
 	    						}
 							?>
 
- 	                    </section>
- 	                    <section>
- 	                        <div class="widget">
- 	                            <div class="row">
- 	                                <div class="widget-content">
- 	                                    <div class="col-lg-1">
- 	                                        <label>Desde:</label>
- 	                                    </div>
- 	                                    <div class="col-lg-3">
- 	                                        <input type="text" name="fecha1" id="fecha1" class="form-control datepick"
- 	                                            value="<?php echo $fecha_1;?>">
- 	                                    </div>
- 	                                    <div class="col-lg-1">
- 	                                        <label>Hasta</label>
- 	                                    </div>
- 	                                    <div class="col-lg-3">
- 	                                        <input type="text" name="fecha2" id="fecha2" class="form-control datepick"
- 	                                            value="<?php echo $fecha_2;?>">
- 	                                    </div>
- 	                                    <div class="col-lg-2">
+						</section>
+						<section>
+							<div class="widget">
+							<div class="row">
+								<div class="widget-content">
+									<div class="col-lg-1">
+										<label>Desde:</label>
+									</div>
+									<div class="col-lg-3">
+										<input type="text" name="fecha1" id="fecha1" class="form-control datepick" value="<?php echo $fecha_1;?>">
+									</div>
+									<div class="col-lg-1">
+										<label>Hasta</label>
+									</div>
+									<div class="col-lg-3">
+										<input type="text" name="fecha2" id="fecha2" class="form-control datepick" value="<?php echo $fecha_2;?>">
+									</div>
+									<div class="col-lg-2">
 
- 	                                    </div>
- 	                                    <div class="col-lg-1" style="text-align: left;">
- 	                                        <a id='search' name='search' class='btn btn-primary m-t-n-xs'
- 	                                            style="margin-top: 0.5%;"><i class="fa fa-search"></i> Buscar</a>
- 	                                    </div>
- 	                                </div>
- 	                            </div>
- 	                        </div>
- 	                    </section>
- 	                    <section>
- 	                        <table class="table table-striped table-bordered table-hover" id="editable">
- 	                            <thead>
- 	                                <tr>
- 	                                    <th>N°</th>
- 	                                    <th>Fecha</th>
- 	                                    <th>Hora</th>
- 	                                    <th>Empleado</th>
- 	                                    <th>Turno</th>
- 	                                    <th>Tipo Corte</th>
- 	                                    <th>Total</th>
- 	                                    <th>Diferencia</th>
- 	                                    <th>Acci&oacute;n</th>
- 	                                </tr>
- 	                            </thead>
- 	                            <tbody id="caja_x">
- 	                                <?php
+									</div>
+									<div class="col-lg-1" style="text-align: left;">
+										<a id='search' name='search' class='btn btn-primary m-t-n-xs' style="margin-top: 0.5%;"><i class="fa fa-search"></i> Buscar</a>
+									</div>
+								</div>
+							</div>
+							</div>
+						</section>
+						<section>
+							<table class="table table-striped table-bordered table-hover" id="editable">
+								<thead>
+									<tr>
+										<th>N°</th>
+										<th>Fecha</th>
+										<th>Hora</th>
+										<th>Empleado</th>
+										<th>Turno</th>
+										<th>Tipo Corte</th>
+										<th>Total</th>
+										<th>Diferencia</th>
+										<th>Acci&oacute;n</th>
+									</tr>
+								</thead>
+								<tbody id="caja_x">
+								<?php
 									$s = 1;
 									$sql_cc =_query("SELECT * FROM controlcaja WHERE id_sucursal = '$id_sucursal' AND fecha_corte BETWEEN '$fecha_1' AND '$fecha_2' AND tipo_corte != '' ORDER BY id_corte DESC");
 									$cuenta_corte = _num_rows($sql_cc);
@@ -924,21 +911,20 @@
 											$total = $row_cc["cashfinal"];
 											$diferencia = $row_cc["diferencia"];
 											$turno = $row_cc["turno"];
-						$sql_empleadox="";
-						if ($id_empleado_c<0) {
-							# code...
-							$sql_empleadox = _query("SELECT * FROM usuario WHERE id_usuario = '$id_empleado_c'");
-						}
-						else {
-							# code...
-							$sql_empleadox = _query("SELECT empleado.nombre FROM usuario JOIN empleado ON usuario.id_empleado = empleado.id_empleado WHERE usuario.id_usuario = '$id_empleado_c'");
-						}
-						$nombre = "";
-						if(_num_rows($sql_empleadox) > 0){
-							$rr = _fetch_array($sql_empleadox);
-							$nombre = $rr["nombre"];
-						}
-			    							
+                      $sql_empleadox="";
+                      if ($id_empleado_c<0) {
+                        # code...
+                        $sql_empleadox = _query("SELECT * FROM usuario WHERE id_usuario = '$id_empleado_c'");
+
+                      }
+                      else {
+                        # code...
+
+                        $sql_empleadox = _query("SELECT empleado.nombre FROM usuario JOIN empleado ON usuario.id_empleado = empleado.id_empleado WHERE usuario.id_usuario = '$id_empleado_c'");
+
+                      }
+			    							$rr = _fetch_array($sql_empleadox);
+			    							$nombre = $rr["nombre"];
 
 
 
@@ -969,34 +955,27 @@
 										}
 									}
 								?>
- 	                            </tbody>
- 	                        </table>
- 	                        <input type="hidden" name="autosave" id="autosave" value="false-0">
- 	                    </section>
- 	                    <!--Show Modal Popups View & Delete -->
- 	                    <div class='modal fade' id='viewModal' tabindex='-1' role='dialog' aria-labelledby='myModalLabel'
- 	                        aria-hidden='true'>
- 	                        <div class='modal-dialog'>
- 	                            <div class='modal-content'></div><!-- /.modal-content -->
- 	                        </div><!-- /.modal-dialog -->
- 	                    </div><!-- /.modal -->
- 	                    <div class='modal fade' id='deleteModal' tabindex='-1' role='dialog'
- 	                        aria-labelledby='myModalLabel' aria-hidden='true'>
- 	                        <div class='modal-dialog'>
- 	                            <div class='modal-content modal-sm'></div><!-- /.modal-content -->
- 	                        </div><!-- /.modal-dialog -->
- 	                    </div><!-- /.modal -->
- 	                </div>
- 	                <!--div class='ibox-content'-->
- 	            </div>
- 	            <!--<div class='ibox float-e-margins' -->
- 	        </div>
- 	        <!--div class='col-lg-12'-->
- 	    </div>
- 	    <!--div class='row'-->
- 	</div>
- 	<!--div class='wrapper wrapper-content  animated fadeInRight'-->
- 	<?php
+								</tbody>
+							</table>
+							 <input type="hidden" name="autosave" id="autosave" value="false-0">
+						</section>
+						<!--Show Modal Popups View & Delete -->
+						<div class='modal fade' id='viewModal' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
+							<div class='modal-dialog'>
+								<div class='modal-content'></div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div><!-- /.modal -->
+						<div class='modal fade' id='deleteModal' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
+							<div class='modal-dialog'>
+								<div class='modal-content modal-sm'></div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div><!-- /.modal -->
+	               	</div><!--div class='ibox-content'-->
+	       		</div><!--<div class='ibox float-e-margins' -->
+			</div> <!--div class='col-lg-12'-->
+		</div> <!--div class='row'-->
+	</div><!--div class='wrapper wrapper-content  animated fadeInRight'-->
+	<?php
 		include("footer.php");
 		echo" <script type='text/javascript' src='js/funciones/funciones_corte_caja.js'></script>";
 		} //permiso del script
@@ -1036,13 +1015,9 @@
         # code...
         $sql_empleado = _query("SELECT empleado.nombre FROM usuario JOIN empleado ON usuario.id_empleado = empleado.id_empleado WHERE usuario.id_usuario = '$id_empleado'");
 
-      }	
-	  $nombre = "";
-	  		if(_num_rows($sql_empleado) > 0){
-				$rr = _fetch_array($sql_empleado);
-				$nombre = $rr["nombre"];
-			}
-			
+      }
+			$rr = _fetch_array($sql_empleado);
+			$nombre = $rr["nombre"];
 			$turno_txt = "";
 			echo "<input type='hidden' id='aper_id' name='aper_id' value='".$id_apertura."'>";
 			/////////////////////////////////////////////////////////////////////////////////////////////
@@ -1087,45 +1062,42 @@
 
 		$total_corte = $total_tike + $total_factura + $total_credito_fiscal;
 ?>
- 	<div class="row">
- 	    <input type="hidden" name="id_apertura" id="id_apertura" value="<?php echo $id_apertura;?>">
- 	    <table class="table table-bordered">
- 	        <thead>
- 	            <tr>
- 	                <th colspan="3" style="text-align: center"><label class="badge badge-success"
- 	                        style="font-size: 15px; ">Apertura Vigente</label></th>
- 	            </tr>
- 	            <tr>
- 	                <th>Nombre: <?php echo $nombre;?></th>
- 	                <th>Fecha Apertura: <?php echo ED($fecha_apertura);?></th>
- 	                <th>Hora Apertura: <?php echo $hora_apertura;?></th>
- 	            </tr>
- 	            <tr>
- 	                <th>Monto Apertura: <?php echo "$".$monto_apertura;?></th>
- 	                <th>Turno: <?php echo $turno;?></th>
- 	                <th>Monto Registrado: <?php echo $total_corte;?></th>
- 	            </tr>
- 	            <?php
+		<div class="row">
+		<input type="hidden" name="id_apertura" id="id_apertura" value="<?php echo $id_apertura;?>">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th colspan="3" style="text-align: center"><label class="badge badge-success" style="font-size: 15px; ">Apertura Vigente</label></th>
+					</tr>
+					<tr>
+						<th>Nombre: <?php echo $nombre;?></th>
+						<th>Fecha Apertura: <?php echo ED($fecha_apertura);?></th>
+						<th>Hora Apertura: <?php echo $hora_apertura;?></th>
+					</tr>
+					<tr>
+						<th>Monto Apertura: <?php echo "$".$monto_apertura;?></th>
+						<th>Turno: <?php echo $turno;?></th>
+						<th>Monto Registrado: <?php echo $total_corte;?></th>
+					</tr>
+					<?php
 						$sql_d_ap = _query("SELECT * FROM detalle_apertura WHERE id_apertura = '$id_apertura' AND vigente = 1 AND id_usuario = '$id_empleado1'");
 						//echo "SELECT * FROM detalle_apertura WHERE id_apertura = '$id_apertura' AND vigente = 1 AND id_usuario = '$id_empleado'";
 						$cuenta_a = _num_rows($sql_d_ap);
 						if($cuenta_a == 1)
 						{
 						?>
- 	            <tr>
- 	                <th colspan="3" style="text-align: center">
- 	                    <a <?php echo "href='corte_caja_diario.php?aper_id=".$id_apertura."'";?> id="generar_corte"
- 	                        name="generar_corte" class="btn btn-primary m-t-n-xs"> Realizar Corte</a>
- 	                    <?php if($turno_vigente == 1){?>
- 	                    <a data-toggle='modal' id="cerrar_turno" name="cerrar_turno" class="btn btn-primary m-t-n-xs"
- 	                        <?php  echo "href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&val=0'"?>
- 	                        data-target='#viewModal' data-refresh='true'>Cerrar Turno</a>
- 	                    <?php
+						<tr>
+							<th colspan="3" style="text-align: center">
+								<a <?php echo "href='corte_caja_diario.php?aper_id=".$id_apertura."'";?> id="generar_corte" name="generar_corte" class="btn btn-primary m-t-n-xs" > Realizar Corte</a>
+								<?php if($turno_vigente == 1){?>
+								<a data-toggle='modal' id="cerrar_turno" name="cerrar_turno" class="btn btn-primary m-t-n-xs" <?php  echo "href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&val=0'"?>
+			data-target='#viewModal' data-refresh='true' >Cerrar Turno</a>
+								<?php
 								}
 								?>
- 	                </th>
- 	            </tr>
- 	            <?php
+							</th>
+						</tr>
+						<?php
 						}
 						else
 						{
@@ -1155,7 +1127,8 @@
 														echo "</tr>";
 														echo "<tr>";
 														echo "<th colspan='3' style='text-align: center'>";
-														echo "<a href='corte_caja_diario.php?aper_id=".$id_apertura."' id='generar_corte' name='generar_corte' class='btn btn-primary m-t-n-xs' > Realizar Corte</a> <a data-toggle='modal' id='cerrar_turno' name='cerrar_turno' class='btn btn-primary m-t-n-xs' href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&id_detalle=".$id_d_ap."&emp=".$emp."&val=0' data-target='#viewModal' data-refresh='true' >Cerrar Turno Vigente</a>";
+														echo "<a href='corte_caja_diario.php?aper_id=".$id_apertura."' id='generar_corte' name='generar_corte' class='btn btn-primary m-t-n-xs' > Realizar Corte</a>";
+														//echo "<a data-toggle='modal' id='cerrar_turno' name='cerrar_turno' class='btn btn-primary m-t-n-xs' href='cierre_turno.php?id_apertura=".$id_apertura."&turno=".$turno."&id_detalle=".$id_d_ap."&emp=".$emp."&val=0' data-target='#viewModal' data-refresh='true' >Cerrar Turno Vigente</a>";
 														echo "</th>";
 														echo "</tr>";
 								}
@@ -1174,10 +1147,10 @@
 						}
 					?>
 
- 	        </thead>
- 	    </table>
- 	</div>
- 	<?php
+				</thead>
+			</table>
+		</div>
+<?php
 		}
 		else
 		{

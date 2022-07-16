@@ -214,7 +214,11 @@ $admin=$_SESSION["admin"];
 									<table class="table">
 										<?php
 										$fecha_actual = date("Y-m-d");
-										$sql="SELECT DISTINCT factura.id_empleado,usuario.usuario, empleado.nombre FROM factura JOIN usuario ON usuario.id_usuario=factura.id_empleado LEFT JOIN empleado ON empleado.id_empleado=usuario.id_empleado WHERE factura.fecha='$fecha_actual'";
+										$sql="SELECT DISTINCT factura.id_empleado, empleado.nombre 
+											FROM factura 
+											INNER JOIN empleado ON empleado.id_empleado=factura.id_empleado 
+											WHERE factura.fecha='$fecha_actual'
+											AND factura.id_sucursal='$id_sucursal'";
 
 										$result=_query($sql);
 										$cuenta = _num_rows($result);
@@ -229,7 +233,14 @@ $admin=$_SESSION["admin"];
 													// code...
 													$nombre=$row["usuario"];
 												}
-												$sql_monto = _query("SELECT SUM(total) as total FROM factura WHERE id_empleado = '$id_empleado' AND fecha = '$fecha_actual' AND anulada = 0 AND finalizada = 1 AND caja!=0 AND credito=0");
+												$sql_monto = _query("SELECT SUM(total) as total 
+													FROM factura 
+													WHERE id_empleado = '$id_empleado' 
+													AND fecha = '$fecha_actual' 
+													AND anulada = 0 
+													AND finalizada = 1 
+													AND caja!=0 
+													AND id_sucursal=$id_sucursal");
 												//echo "SELECT SUM(subtotal) as monto FROM factura_detalle WHERE id_empleado = '$id_empleado' AND fecha = '$fecha_actual'";
 
 												$row_monto = _fetch_array($sql_monto);

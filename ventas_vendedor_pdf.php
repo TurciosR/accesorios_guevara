@@ -99,11 +99,11 @@ while(strtotime($fk) <= strtotime($fin))
 {
 
 $fecha_actual = $fk;
-$sql="SELECT DISTINCT factura.id_empleado, usuario.usuario, empleado.nombre 
+$sql="SELECT DISTINCT factura.id_empleado, empleado.nombre 
 FROM factura 
-JOIN usuario ON usuario.id_empleado = factura.id_empleado
 JOIN empleado ON factura.id_empleado = empleado.id_empleado
-WHERE factura.fecha='$fecha_actual'";
+WHERE factura.fecha='$fecha_actual'
+AND factura.id_sucursal=$_SESSION[id_sucursal]";
 
 
 $result=_query($sql);
@@ -120,8 +120,14 @@ if($cuenta > 0)
       // code...
       $nombre=$row["usuario"];
     }
-    $sql_monto = _query("SELECT SUM(total) as total FROM factura WHERE id_empleado = '$id_empleado' AND fecha = '$fecha_actual' AND anulada = 0 AND finalizada = 1 AND caja!=0 AND credito=0");
-    //echo "SELECT SUM(subtotal) as monto FROM factura_detalle WHERE id_empleado = '$id_empleado' AND fecha = '$fecha_actual'";
+    $sql_monto = _query("SELECT SUM(total) as total 
+    FROM factura 
+    WHERE id_empleado = '$id_empleado' 
+    AND fecha = '$fecha_actual' 
+    AND anulada = 0 
+    AND finalizada = 1 
+    AND caja!=0
+    AND id_sucursal=$_SESSION[id_sucursal]");
 
     $row_monto = _fetch_array($sql_monto);
     $monto_total = $row_monto["total"];
@@ -136,12 +142,12 @@ if($cuenta > 0)
 
     if (!array_key_exists($id_empleado,$empleados)) {
       // code...
-      $empleados[$id_empleado]['nombre']=$nombre." (".($row["usuario"]).")";
+      $empleados[$id_empleado]['nombre']=$nombre;
       $empleados[$id_empleado]['total']=$monto_total;
     }
     else
     {
-      $empleados[$id_empleado]['nombre']=$nombre." (".($row["usuario"]).")";
+      $empleados[$id_empleado]['nombre']=$nombre;
       $empleados[$id_empleado]['total']= $empleados[$id_empleado]['total'] + $monto_total;
     }
 
@@ -167,4 +173,4 @@ foreach ($empleados as $key ) {
 }
 
 ob_clean();
-$pdf->Output("reporte_costos_utilidades_diarias.pdf","I");
+$pdf->Output("reporte_ventas_vendedor.pdf","I");
